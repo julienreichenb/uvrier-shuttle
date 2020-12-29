@@ -45,10 +45,11 @@
               </font-awesome-layers>
             </b-col>
             <b-col class="text-left pl-4">
-              <h4 class="pt-2">Véhicules libres</h4>
+              <h4 class="pt-2">Navette(s) en service</h4>
               <h2>{{ shuttleFree }}</h2>
             </b-col>
           </b-row>
+          <!--
           <b-row no-gutters class="text-danger border-bottom border-secondary" style="padding: 10px; width: 400px;">
             <b-col sm="3" class="my-auto">
               <font-awesome-layers class="fa-4x">
@@ -65,6 +66,7 @@
               <h2>{{ shuttleBusy }}</h2>
             </b-col>
           </b-row>
+          -->
           <b-row no-gutters class="text-info" style="padding: 10px; width: 400px;">
             <b-col sm="3" class="my-auto">
               <font-awesome-icon icon="clock" class="fa-4x" />
@@ -75,6 +77,12 @@
             </b-col>
           </b-row>
         </div>
+        <b-card class="mt-3 border border-dark" header-bg-variant="primary" header-text-variant="white">
+          <template v-slot:header>
+            <h3 class="mt-1">Annonces</h3>
+          </template>
+          <h4 class="text-left">{{ liveInfo }}</h4>
+        </b-card>
       </l-control>
       <l-marker :lat-lng="youAreHere" />
       <l-marker 
@@ -138,6 +146,7 @@ export default {
       shuttleFree: 0,
       shuttleBusy: 0,
       avgWaitingTime: 0,
+      liveInfo: 'Traffic régulier.'
     }
   },
   methods: {
