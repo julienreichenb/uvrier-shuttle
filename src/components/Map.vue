@@ -88,12 +88,12 @@
       <l-marker 
         v-for="shuttle in shuttlePositions" 
         :key="shuttle.id" 
-        :lat-lng="shuttle.position">
+        :lat-lng="shuttle.location">
         <l-icon>
           <font-awesome-layers>
             <font-awesome-icon icon="circle" class="fa-3x" />
             <font-awesome-icon icon="circle" class="fa-3x text-white" transform="shrink-1" />
-            <font-awesome-icon icon="bus" class="fa-3x" :class="shuttle.busy ? 'text-danger' : 'text-success'" transform="shrink-6" />
+            <font-awesome-icon icon="bus" class="fa-3x text-success" transform="shrink-6" />
           </font-awesome-layers>
         </l-icon>
       </l-marker>
@@ -118,13 +118,16 @@ export default {
   mounted() {
     // Initial load
     this.loadShuttlesPositions()
-    // Reoad Shuttles' position every 15 seconds
+    // Reoad Shuttles' position every 5 seconds
     setInterval(() => {
       this.loadShuttlesPositions()
-    }, 15000);
+    }, 5000);
   },
   data() {
     return {
+      // apiServer: 'https://api.sandbox.bestmile.com',
+      // apiKey: 'ziEI.0jfdJVXdMKUhfCsKluCF8TnQaINhsWVC',
+      // serviceID: '88e0488c-145f-42d8-9510-70c70922f652',
       zoom: 16,
       center: latLng(46.2507967, 7.4220283),
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -157,24 +160,36 @@ export default {
       this.currentCenter = center
     },
     loadShuttlesPositions() {
-      // Call API to get the current shuttles'position
-      setTimeout(() => {
-          // Simulating API delay
-          const apiResult = [
-            { id: 1, busy: true, position: latLng(46.251236, 7.4299814) },
-            { id: 2, busy: false, position: latLng(46.2505541, 7.4096985) },
-            { id: 3, busy: false, position: latLng(46.2521233, 7.4094444) },
-            { id: 4, busy: false, position: latLng(46.2522791, 7.4291195) },
-            { id: 5, busy: true, position: latLng(46.2538857, 7.4199932) },
-            { id: 6, busy: false, position: latLng(46.2544875, 7.42915647) },
-            { id: 7, busy: true, position: latLng(46.2525656, 7.4214758) },
-            { id: 8, busy: true, position: latLng(46.2505421, 7.4193632) },
-          ]
-          this.shuttlePositions = apiResult
-          this.shuttleBusy = apiResult.filter((s) => s.busy === true).length
-          this.shuttleFree = apiResult.length - this.shuttleBusy
-          this.avgWaitingTime = 2
-      }, 400)
+      // Call API to get the current shuttles'position      
+      fetch(process.env.VUE_APP_API_SERVER + '/transportation/v2/services/' + process.env.VUE_APP_API_SERVICE_ID + '/vehicles', {
+        method: 'GET',
+        headers: { 
+          'Accept': 'application/json',
+          'apiKey': process.env.VUE_APP_API_KEY
+        }
+      })
+      .then(response => { 
+          if(response.ok){
+              return response.json()    
+          } else{
+              this.shuttlePositions = null
+              this.shuttleFree = 0
+              this.shuttleBusy = 2;
+              alert("Server returned " + response.status + " : " + response.statusText);
+          }                
+      })
+      .then(response => {
+          if(response){
+              this.shuttlePositions = response
+              this.shuttleFree = this.shuttlePositions.length
+              this.shuttleBusy = process.env.VUE_APP_SHUTTLE_NUMBER - this.shuttlePositions.length;
+          }
+      })
+      .catch(err => {
+          console.log(err);
+      });
+      
+      this.avgWaitingTime = 2      
     },
     confirmBooking(booked) {
       this.booked = booked
