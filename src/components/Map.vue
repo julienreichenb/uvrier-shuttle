@@ -109,6 +109,7 @@ import { latLng } from "leaflet"
 import InfoModal from './InfoModal'
 import BookModal from './BookModal'
 import ConfirmModal from './ConfirmModal'
+import { API_KEY, API_SERVICE_ID, API_SERVER } from '../constants'
 export default {
   components: {
   InfoModal,
@@ -125,9 +126,7 @@ export default {
   },
   data() {
     return {
-      // apiServer: 'https://api.sandbox.bestmile.com',
-      // apiKey: 'ziEI.0jfdJVXdMKUhfCsKluCF8TnQaINhsWVC',
-      // serviceID: '88e0488c-145f-42d8-9510-70c70922f652',
+      shuttleNumber: 2,
       zoom: 16,
       center: latLng(46.2507967, 7.4220283),
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -161,11 +160,11 @@ export default {
     },
     loadShuttlesPositions() {
       // Call API to get the current shuttles'position      
-      fetch(process.env.VUE_APP_API_SERVER + '/transportation/v2/services/' + process.env.VUE_APP_API_SERVICE_ID + '/vehicles', {
+      fetch(API_SERVER + '/transportation/v2/services/' + API_SERVICE_ID + '/vehicles', {
         method: 'GET',
-        headers: { 
+        headers: {
           'Accept': 'application/json',
-          'apiKey': process.env.VUE_APP_API_KEY
+          'apiKey': API_KEY
         }
       })
       .then(response => { 
@@ -174,7 +173,7 @@ export default {
           } else{
               this.shuttlePositions = null
               this.shuttleFree = 0
-              this.shuttleBusy = 2;
+              this.shuttleBusy = 0;
               alert("Server returned " + response.status + " : " + response.statusText);
           }                
       })
@@ -182,7 +181,7 @@ export default {
           if(response){
               this.shuttlePositions = response
               this.shuttleFree = this.shuttlePositions.length
-              this.shuttleBusy = process.env.VUE_APP_SHUTTLE_NUMBER - this.shuttlePositions.length;
+              this.shuttleBusy = this.shuttleNumber - this.shuttlePositions.length;
           }
       })
       .catch(err => {

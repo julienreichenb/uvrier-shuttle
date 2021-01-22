@@ -20,7 +20,7 @@
                                     <font-awesome-icon icon="map-marker-alt" class="large-text" />
                                 </b-input-group-text>
                             </template>
-                            <span class="large-text pt-1 ml-3 font-weight-bold">{{ startingPoint }}</span>
+                            <span v-if="origin" class="large-text pt-1 ml-3 font-weight-bold">{{ origin.name }}</span>
                         </b-input-group>
                     </b-form-group>
                 </b-col>
@@ -32,7 +32,7 @@
                                     <font-awesome-icon icon="flag" class="large-text" />
                                 </b-input-group-text>
                             </template>
-                            <b-form-select id="destination" v-model="selectedDestination" required :options="destinationOptions" class="large-text" @change="computeDeparture()" />
+                            <b-form-select id="destination" v-model="selectedDestinationId" required :options="destinationOptions" class="large-text" @change="computeDeparture()" />
                         </b-input-group>
                     </b-form-group>
                 </b-col>
@@ -51,7 +51,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <b-row class="my-5" v-if="selectedDestination && selectedNumber">
+            <b-row class="my-5" v-if="selectedDestinationId && selectedNumber">
                 <b-col sm="12" class="mb-5">
                     <b-form-group label="Prochain départ dans" label-for="time-departure">
                         <b-input-group class="mt-3" size="lg">
@@ -83,14 +83,17 @@
 </template>
 
 <script>
+import { API_KEY, API_SERVICE_ID, API_SERVER } from '../constants'
 export default {
     props: {
         show: { type: Boolean, default: false },
     },
     data() {
         return {
-            startingPoint: "Gare d'Uvrier",
-            selectedDestination: null,
+            startingPointSearchValue: 'gare',
+            stops: null,
+            origin: null,
+            selectedDestinationId: null,
             selectedNumber: null,
             timeDeparture: null,
             loadingTimeDeparture: false,
@@ -114,7 +117,7 @@ export default {
     methods: {
         computeDeparture() {
             this.timeDeparture = null
-            if (!this.selectedDestination || !this.selectedNumber) return
+            if (!this.selectedDestinationId || !this.selectedNumber) return
             // Call API to know when is the next available shuttle, considering destination/passenger number
             this.loadingTimeDeparture = true
             setTimeout(() => {
@@ -130,29 +133,51 @@ export default {
         },
         loadAvailableDestinations() {
             // Call API to get the available destinations
-            setTimeout(() => {
-                // Simulating API delay
-                 const apiAnswer = [
-                    'Point A',
-                    'Point B',
-                    'Point C',
-                    'Point D',
-                    'Point E',
-                    'Point F'
-                ]
-                this.destinationOptions = this.destinationOptions.concat(apiAnswer)
-            }, 400)           
+            fetch(API_SERVER + '/transportation/v1/services/' + API_SERVICE_ID + '/stops', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'apiKey': API_KEY
+                }
+            })
+            .then(response => { 
+                if(response.ok){
+                    return response.json()    
+                } else{
+                    this.destinationOptions = [{ text: 'Choisissez une destination', value: null }]
+                    alert('Server returned ' + response.status + ' : ' + response.statusText);
+                }                
+            })
+            .then(response => {
+                if(response){
+                    this.stops = response
+                    this.origin = this.stops.find(s => s.name.toLowerCase().includes(this.startingPointSearchValue))                    
+                    this.destinationOptions = this.destinationOptions.concat(this.stops.filter(s => s.id !== this.origin.id)
+                        .map(s => {
+                            return {
+                                value: s.id,
+                                text: s.name
+                            }
+                        })
+                        .sort((a,b) => a.value.localeCompare(b.value)))
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            });                  
         },
         reset() {
             this.selectedNumber = null
-            this.selectedDestination = null
+            this.selectedDestinationId = null
             this.timeDeparture = null
         },
         book() {
+            const destination = this.stops.find(s => s.id === this.selectedDestinationId)
+
             // Call API to book the trip
             setTimeout(() => {
                 // Simulating API delay
-                const apiAnswer = { id: 4312097, success: true, destination: this.selectedDestination, persons: this.selectedNumber, time: this.timeDeparture }
+                const apiAnswer = { id: 4312097, success: true, destination: destination.name, persons: this.selectedNumber, time: this.timeDeparture }
                 this.$emit('booking', apiAnswer)
                 this.reset()
             }, 4000)
