@@ -83,14 +83,13 @@
 </template>
 
 <script>
-import { API_KEY, API_SERVICE_ID, API_SERVER } from '../constants'
+import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME } from '../constants'
 export default {
     props: {
         show: { type: Boolean, default: false },
     },
     data() {
         return {
-            startingPointSearchValue: 'gare',
             stops: null,
             origin: null,
             selectedDestinationId: null,
@@ -151,7 +150,7 @@ export default {
             .then(response => {
                 if(response){
                     this.stops = response
-                    this.origin = this.stops.find(s => s.name.toLowerCase().includes(this.startingPointSearchValue))                    
+                    this.origin = this.stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))                    
                     this.destinationOptions = this.destinationOptions.concat(this.stops.filter(s => s.id !== this.origin.id)
                         .map(s => {
                             return {

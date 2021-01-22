@@ -84,7 +84,12 @@
           <h4 class="text-left">{{ liveInfo }}</h4>
         </b-card>
       </l-control>
-      <l-marker :lat-lng="youAreHere" />
+      <l-marker v-if="origin" :lat-lng="origin.location" />
+      <l-marker 
+        v-for="(destination, index) in destinations" 
+        :key="'destination-' + index" 
+        :lat-lng="destination.location">        
+      </l-marker>
       <l-marker 
         v-for="shuttle in shuttlePositions" 
         :key="shuttle.id" 
@@ -109,7 +114,7 @@ import { latLng } from "leaflet"
 import InfoModal from './InfoModal'
 import BookModal from './BookModal'
 import ConfirmModal from './ConfirmModal'
-import { API_KEY, API_SERVICE_ID, API_SERVER } from '../constants'
+import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME } from '../constants'
 export default {
   components: {
   InfoModal,
@@ -119,6 +124,7 @@ export default {
   mounted() {
     // Initial load
     this.loadShuttlesPositions()
+    this.loadOriginAndDestinations()
     // Reoad Shuttles' position every 5 seconds
     setInterval(() => {
       this.loadShuttlesPositions()
@@ -126,6 +132,8 @@ export default {
   },
   data() {
     return {
+      origin: null,
+      destinations: null,
       shuttleNumber: 2,
       zoom: 16,
       center: latLng(46.2507967, 7.4220283),
@@ -139,8 +147,7 @@ export default {
         zoomSnap: 0.5,
         zoomControl: false,
       },
-      showMap: true,
-      youAreHere: latLng(46.2515022, 7.4194519),
+      showMap: true,      
       shuttlePositions: null,
       showBook: false,
       showConfirm: false,
@@ -182,6 +189,37 @@ export default {
               this.shuttlePositions = response
               this.shuttleFree = this.shuttlePositions.length
               this.shuttleBusy = this.shuttleNumber - this.shuttlePositions.length;
+          }
+      })
+      .catch(err => {
+          console.log(err);
+      });
+      
+      this.avgWaitingTime = 2      
+    },
+    loadOriginAndDestinations() {
+      // Call API to get the stops position      
+      fetch(API_SERVER + '/transportation/v1/services/' + API_SERVICE_ID + '/stops', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'apiKey': API_KEY
+        }
+      })
+      .then(response => { 
+          if(response.ok){
+              return response.json()    
+          } else{
+              this.origin
+              this.destinations = null
+              alert("Server returned " + response.status + " : " + response.statusText);
+          }                
+      })
+      .then(response => {
+          if(response){
+              const stops = response
+              this.origin = stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))                    
+              this.destinations = stops.filter(s => s.id !== this.origin.id)
           }
       })
       .catch(err => {
