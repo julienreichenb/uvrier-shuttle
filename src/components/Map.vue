@@ -88,7 +88,8 @@
       <l-marker 
         v-for="(destination, index) in destinations" 
         :key="'destination-' + index" 
-        :lat-lng="destination.location">        
+        :lat-lng="destination.location">
+        <l-tooltip :content="destination.name" :options="{ permanent: true, direction: 'auto' }" />
       </l-marker>
       <l-marker 
         v-for="shuttle in shuttlePositions" 
