@@ -84,16 +84,22 @@
           <h4 class="text-left">{{ liveInfo }}</h4>
         </b-card>
       </l-control>
-      <l-marker v-if="origin" :lat-lng="origin.location">
+      <l-circle-marker v-if="origin" 
+        :lat-lng="origin.location"
+        :radius="circle.radius"
+        :color="originColor"
+        :fill-color="originColor"
+        :fill-opacity="circle.fillOpacity"
+        :weight="circle.weight">
         <l-tooltip :content="origin.name" :options="{ permanent: true, direction: 'auto' }"/>
-      </l-marker>
+      </l-circle-marker>
       <l-circle-marker 
         v-for="(destination, index) in destinations" 
         :key="'destination-' + index" 
         :lat-lng="destination.location"
         :radius="circle.radius"
-        :color="'red'"
-        :fill-color="'red'"
+        :color="destinationColor"
+        :fill-color="destinationColor"
         :fill-opacity="circle.fillOpacity"
         :weight="circle.weight">
         <l-tooltip :content="destination.name" :options="{ permanent: true, direction: 'auto' }"/>
@@ -168,7 +174,9 @@ export default {
         radius: 4,
         fillOpacity: 0.5,
         weight: 2
-      }
+      },
+      originColor: 'green',
+      destinationColor: 'red'
     }
   },
   methods: {
@@ -180,7 +188,7 @@ export default {
     },
     loadShuttlesPositions() {
       // Call API to get the current shuttles'position      
-      fetch(API_SERVER + '/transportation/v2/services/' + API_SERVICE_ID + '/vehicles', {
+      fetch(API_SERVER + '/transportation/v1/vehicles', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
