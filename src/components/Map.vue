@@ -84,7 +84,9 @@
           <h4 class="text-left">{{ liveInfo }}</h4>
         </b-card>
       </l-control>
-      <l-marker v-if="origin" :lat-lng="origin.location" />        
+      <l-marker v-if="origin" :lat-lng="origin.location">
+        <l-tooltip :content="origin.name" :options="{ permanent: true, direction: 'auto' }"/>
+      </l-marker>
       <l-circle-marker 
         v-for="(destination, index) in destinations" 
         :key="'destination-' + index" 
