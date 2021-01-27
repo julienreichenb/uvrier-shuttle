@@ -158,7 +158,7 @@ export default {
                                 text: s.name
                             }
                         })
-                        .sort((a,b) => a.value.localeCompare(b.value)))
+                        .sort((a,b) => a.text.localeCompare(b.text)))
                 }
             })
             .catch(err => {
