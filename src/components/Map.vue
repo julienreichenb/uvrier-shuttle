@@ -84,15 +84,9 @@
           <h4 class="text-left">{{ liveInfo }}</h4>
         </b-card>
       </l-control>
-      <l-circle-marker v-if="origin" 
-        :lat-lng="origin.location"
-        :radius="circle.radius"
-        :color="originColor"
-        :fill-color="originColor"
-        :fill-opacity="circle.fillOpacity"
-        :weight="circle.weight">
+      <l-marker v-if="origin" :lat-lng="origin.location">
         <l-tooltip :content="origin.name" :options="{ permanent: true, direction: 'auto' }"/>
-      </l-circle-marker>
+      </l-marker>
       <l-circle-marker 
         v-for="(destination, index) in destinations" 
         :key="'destination-' + index" 
@@ -175,7 +169,6 @@ export default {
         fillOpacity: 0.5,
         weight: 2
       },
-      originColor: 'green',
       destinationColor: 'red'
     }
   },
@@ -265,8 +258,8 @@ export default {
       this.booked = null
       this.showConfirm = false
       this.showBook = false
-    },
-  },
+    }
+  }
 }
 </script>
 
