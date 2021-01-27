@@ -84,13 +84,18 @@
           <h4 class="text-left">{{ liveInfo }}</h4>
         </b-card>
       </l-control>
-      <l-marker v-if="origin" :lat-lng="origin.location" />
-      <l-marker 
+      <l-marker v-if="origin" :lat-lng="origin.location" />        
+      <l-circle-marker 
         v-for="(destination, index) in destinations" 
         :key="'destination-' + index" 
-        :lat-lng="destination.location">
-        <l-tooltip :content="destination.name" :options="{ permanent: true, direction: 'auto' }" />
-      </l-marker>
+        :lat-lng="destination.location"
+        :radius="circle.radius"
+        :color="'red'"
+        :fill-color="'red'"
+        :fill-opacity="circle.fillOpacity"
+        :weight="circle.weight">
+        <l-tooltip :content="destination.name" :options="{ permanent: true, direction: 'auto' }"/>
+      </l-circle-marker>
       <l-marker 
         v-for="shuttle in shuttlePositions" 
         :key="shuttle.id" 
@@ -111,7 +116,7 @@
 </template>
 
 <script>
-import { latLng } from "leaflet"
+import { latLng } from 'leaflet'
 import InfoModal from './InfoModal'
 import BookModal from './BookModal'
 import ConfirmModal from './ConfirmModal'
@@ -156,7 +161,12 @@ export default {
       shuttleFree: 0,
       shuttleBusy: 0,
       avgWaitingTime: 0,
-      liveInfo: 'Traffic régulier.'
+      liveInfo: 'Traffic régulier.',
+      circle: {
+        radius: 4,
+        fillOpacity: 0.5,
+        weight: 2
+      }
     }
   },
   methods: {

@@ -3,7 +3,7 @@ import App from './App.vue'
 import { BootstrapVue } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LControl, LControlZoom, LIcon } from 'vue2-leaflet';
+import { LMap, LTileLayer, LMarker, LCircleMarker, LPopup, LTooltip, LControl, LControlZoom, LIcon } from 'vue2-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
@@ -17,6 +17,7 @@ import {
 Vue.component('l-map', LMap);
 Vue.component('l-tile-layer', LTileLayer);
 Vue.component('l-marker', LMarker);
+Vue.component('l-circle-marker', LCircleMarker);
 Vue.component('l-popup', LPopup);
 Vue.component('l-tooltip', LTooltip);
 Vue.component('l-control', LControl);
