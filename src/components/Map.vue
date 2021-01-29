@@ -189,7 +189,7 @@ export default {
       fetch(API_SERVER + '/transportation/v1/vehicles', {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
+          'Content-Type': 'application/json',
           'apiKey': API_KEY
         }
       })
@@ -221,7 +221,7 @@ export default {
       fetch(API_SERVER + '/transportation/v1/services/' + API_SERVICE_ID + '/stops', {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
+          'Content-Type': 'application/json',
           'apiKey': API_KEY
         }
       })
