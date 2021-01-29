@@ -133,10 +133,10 @@ export default {
     // Initial load
     this.loadShuttlesPositions()
     this.loadOriginAndDestinations()
-    // Reoad Shuttles' position every 5 seconds
+    // Reoad Shuttles' position every 1 second
     setInterval(() => {
       this.loadShuttlesPositions()
-    }, 5000);
+    }, 1000);
   },
   data() {
     return {
