@@ -16,12 +16,9 @@
                 <span>Trajet pour <strong>{{ booking.destination}}</strong> réservé !</span>
             </h2>                    
         </template>
-        <template #modal-header-close>
-            <h3 class="font-weight-normal">
-                <strong>N#{{ booking.id }}</strong>
-            </h3>
-        </template>
-        <h2 class="p-3">Temps d'attente estimé : {{ booking.time }}.</h2>
+        
+        <h2 class="p-3">Horaire estimé: {{ booking.time }}.</h2>
+        <h5 class="p-3">Réservation: {{ booking.id }}</h5>
     </b-modal>
 </template>
 
