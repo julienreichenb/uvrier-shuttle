@@ -66,7 +66,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col sm="8">
-                    <b-button class="larger-text p-4" block variant="success" size="lg" :disabled="!timeDeparture" @click="book()">
+                    <b-button class="larger-text p-4" block variant="success" size="lg" :disabled="!timeDeparture || !quotes" @click="book()">
                         <font-awesome-icon icon="check" color="white" class="mr-3" />
                         <span>Confirmer la réservation</span>
                     </b-button>
@@ -85,14 +85,15 @@
 <script>
 import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME } from '../constants'
 import moment from 'moment'
+import { v4 as uuidv4 } from 'uuid'
 export default {
     props: {
         show: { type: Boolean, default: false },
     },
     data() {
         return {
-            quote: null,
-            booking: null,
+            quotes: null,
+            bookingId: null,
             stops: null,
             origin: null,
             selectedDestinationId: null,
@@ -110,7 +111,7 @@ export default {
                 { text: '3 personnes', value: 3 },
                 { text: '4 personnes', value: 4 },
                 { text: '5 personnes', value: 5 },
-            ],
+            ]
         }
     },
     created() {
@@ -160,8 +161,8 @@ export default {
             .then(response => {
                 if(response.length > 0){
                     this.quotes = response
-                    this.timeDeparture = 'Départ à ' + moment(this.quotes[0].journeyEstimate.startTime.earliest).format('h:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.startTime.latest).format('h:mm')
-                                            + ' Arrivée à ' + moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('h:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.finishTime.latest).format('h:mm')
+                    this.timeDeparture = 'Départ à ' + moment(this.quotes[0].journeyEstimate.startTime.earliest).format('HH:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.startTime.latest).format('HH:mm')
+                                            + ' Arrivée à ' + moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('HH:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.finishTime.latest).format('HH:mm')
                 }
                 else {
                     this.timeDeparture = 'Aucun trajet disponible.'
@@ -170,7 +171,7 @@ export default {
             })
             .catch(err => {
                 console.log(err);
-            });
+            })
         },
         loadAvailableDestinations() {
             // Call API to get the available destinations
@@ -184,8 +185,7 @@ export default {
             .then(response => { 
                 if(response.ok){
                     return response.json()    
-                } else{
-                    this.destinationOptions = [{ text: 'Choisissez une destination', value: null }]
+                } else {
                     alert('Server returned ' + response.status + ' : ' + response.statusText);
                 }                
             })
@@ -211,17 +211,47 @@ export default {
             this.selectedNumber = null
             this.selectedDestinationId = null
             this.timeDeparture = null
+            this.quotes = null
+            this.bookingId = null
         },
-        book() {
+        book() {       
+            this.bookingId = null
+            if(!this.selectedDestinationId || !this.selectedNumber || !this.quotes || this.quotes.length < 0) return
+
             const destination = this.stops.find(s => s.id === this.selectedDestinationId)
-            
-            // Call API to book the trip
-            setTimeout(() => {
-                // Simulating API delay
-                const apiAnswer = { id: 4312097, success: true, destination: destination.name, persons: this.selectedNumber, time: this.timeDeparture }
-                this.$emit('booking', apiAnswer)
-                this.reset()
-            }, 4000)
+
+            fetch(API_SERVER + '/booking/v5/bookings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apiKey': API_KEY
+                },
+                body: JSON.stringify({
+                    'quoteID': this.quotes[0].id,
+                    'traveler': {
+                        'id': 'display-' + uuidv4()
+                    },
+                    'source': 'Dashboard'
+                })
+            })
+            .then(response => { 
+                if(response.ok){
+                    return response.json()    
+                } else{
+                    alert('Server returned ' + response.status + ' : ' + response.statusText);
+                }                
+            })
+            .then(response => {
+                if(response){
+                    this.bookingId = response.bookingID
+                    const booking = { id: this.bookingId, success: true, destination: destination.name, time: this.timeDeparture }
+                    this.$emit('booking', booking)
+                    this.reset()
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            })
         },
         hide() {
             this.reset()
