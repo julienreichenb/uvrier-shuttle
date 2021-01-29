@@ -200,7 +200,7 @@ export default {
               this.shuttlePositions = null
               this.shuttleFree = 0
               this.shuttleBusy = 0;
-              alert("Server returned " + response.status + " : " + response.statusText);
+              console.log("Server returned " + response.status + " : " + response.statusText);
           }                
       })
       .then(response => {
@@ -231,7 +231,7 @@ export default {
           } else{
               this.origin
               this.destinations = null
-              alert("Server returned " + response.status + " : " + response.statusText);
+              console.log("Server returned " + response.status + " : " + response.statusText);
           }                
       })
       .then(response => {

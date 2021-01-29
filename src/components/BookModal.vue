@@ -155,7 +155,7 @@ export default {
                 if(response.ok){
                     return response.json()    
                 } else{
-                    alert('Server returned ' + response.status + ' : ' + response.statusText);
+                    console.log('Server returned ' + response.status + ' : ' + response.statusText);
                 }                
             })
             .then(response => {
@@ -186,7 +186,7 @@ export default {
                 if(response.ok){
                     return response.json()    
                 } else {
-                    alert('Server returned ' + response.status + ' : ' + response.statusText);
+                    console.log('Server returned ' + response.status + ' : ' + response.statusText);
                 }                
             })
             .then(response => {
@@ -238,7 +238,7 @@ export default {
                 if(response.ok){
                     return response.json()    
                 } else{
-                    alert('Server returned ' + response.status + ' : ' + response.statusText);
+                    console.log('Server returned ' + response.status + ' : ' + response.statusText);
                 }                
             })
             .then(response => {
