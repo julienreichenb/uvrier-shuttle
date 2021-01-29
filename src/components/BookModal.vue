@@ -53,14 +53,14 @@
             </b-row>
             <b-row class="my-5" v-if="selectedDestinationId && selectedNumber">
                 <b-col sm="12" class="mb-5">
-                    <b-form-group label="Prochain départ dans" label-for="time-departure">
+                    <b-form-group label="Prochain départ" label-for="time-departure">
                         <b-input-group class="mt-3" size="lg">
                             <template #prepend>
                                 <b-input-group-text class="bg-warning">
                                     <font-awesome-icon icon="clock" class="large-text" />
                                 </b-input-group-text>
                             </template>
-                            <span v-if="!loadingTimeDeparture" class="large-text pt-1 ml-3 font-weight-bold">{{ timeDeparture }}</span>
+                            <span v-if="!loadingTimeDeparture" class="large-text pt-1 ml-3 font-weight-bold">{{ timeDeparture }}</span>                            
                             <span v-else class="large-text pt-1 ml-3">{{ computingTimeDeparture }}</span>
                         </b-input-group>
                     </b-form-group>
@@ -84,19 +84,22 @@
 
 <script>
 import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME } from '../constants'
+import moment from 'moment'
 export default {
     props: {
         show: { type: Boolean, default: false },
     },
     data() {
         return {
+            quote: null,
+            booking: null,
             stops: null,
             origin: null,
             selectedDestinationId: null,
             selectedNumber: null,
-            timeDeparture: null,
+            timeDeparture: null,            
             loadingTimeDeparture: false,
-            computingTimeDeparture: 'Calcul du temps...',
+            computingTimeDeparture: 'Calcul de l\'horaire...',
             destinationOptions: [
                 { text: 'Choisissez une destination', value: null },
             ],
@@ -116,19 +119,58 @@ export default {
     methods: {
         computeDeparture() {
             this.timeDeparture = null
+            this.quotes = null
             if (!this.selectedDestinationId || !this.selectedNumber) return
             // Call API to know when is the next available shuttle, considering destination/passenger number
             this.loadingTimeDeparture = true
-            setTimeout(() => {
-                // Simulating API delay
-                const noTravelFound = false
-                if(!noTravelFound) {
-                    this.timeDeparture = 4 + ' minutes'
-                } else {
+
+            var destination = this.stops.find(s => s.id === this.selectedDestinationId)
+
+            fetch(API_SERVER + '/booking/v5/quotes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apiKey': API_KEY
+                },
+                body: JSON.stringify({
+                    'origin': {
+                        'location': {
+                            'lat': this.origin.location.lat,
+                            'lon': this.origin.location.lon
+                        },
+                        'label': this.origin.name
+                    },
+                    'destination': {
+                        'location': {
+                            'lat': destination.location.lat,
+                            'lon': destination.location.lon
+                        },
+                        'label': destination.name
+                    },
+                    'numberOfTravelers': this.selectedNumber
+                })
+            })
+            .then(response => { 
+                if(response.ok){
+                    return response.json()    
+                } else{
+                    alert('Server returned ' + response.status + ' : ' + response.statusText);
+                }                
+            })
+            .then(response => {
+                if(response.length > 0){
+                    this.quotes = response
+                    this.timeDeparture = 'Départ à ' + moment(this.quotes[0].journeyEstimate.startTime.earliest).format('h:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.startTime.latest).format('h:mm')
+                                            + ' Arrivée à ' + moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('h:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.finishTime.latest).format('h:mm')
+                }
+                else {
                     this.timeDeparture = 'Aucun trajet disponible.'
                 }
                 this.loadingTimeDeparture = false
-            }, 2000)
+            })
+            .catch(err => {
+                console.log(err);
+            });
         },
         loadAvailableDestinations() {
             // Call API to get the available destinations
@@ -172,7 +214,7 @@ export default {
         },
         book() {
             const destination = this.stops.find(s => s.id === this.selectedDestinationId)
-
+            
             // Call API to book the trip
             setTimeout(() => {
                 // Simulating API delay
