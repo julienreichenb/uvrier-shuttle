@@ -231,7 +231,7 @@ export default {
                     'traveler': {
                         'id': 'display-' + uuidv4()
                     },
-                    'source': 'Dashboard'
+                    'source': 'API'
                 })
             })
             .then(response => { 
