@@ -66,7 +66,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col sm="8">
-                    <b-button class="larger-text p-4" block variant="success" size="lg" :disabled="!timeDeparture || !quotes" @click="book()">
+                    <b-button class="larger-text p-4" block variant="success" size="lg" :disabled="!timeDeparture || !quotes || loadingBookingStatus" @click="book()">
                         <font-awesome-icon icon="check" color="white" class="mr-3" />
                         <span>Confirmer la réservation</span>
                     </b-button>
@@ -93,13 +93,13 @@ export default {
     data() {
         return {
             quotes: null,
-            bookingId: null,
             stops: null,
-            origin: null,
+            origin: null,            
             selectedDestinationId: null,
             selectedNumber: null,
             timeDeparture: null,            
             loadingTimeDeparture: false,
+            loadingBookingStatus: false,
             computingTimeDeparture: 'Calcul de l\'horaire...',
             destinationOptions: [
                 { text: 'Choisissez une destination', value: null },
@@ -114,85 +114,35 @@ export default {
             ]
         }
     },
-    created() {
-        this.loadAvailableDestinations()
+    async created() {
+        await this.loadAvailableDestinations()
     },
     methods: {
-        computeDeparture() {
+        async computeDeparture() {
             this.timeDeparture = null
             this.quotes = null
+
             if (!this.selectedDestinationId || !this.selectedNumber) return
-            // Call API to know when is the next available shuttle, considering destination/passenger number
+            
             this.loadingTimeDeparture = true
-
-            var destination = this.stops.find(s => s.id === this.selectedDestinationId)
-
-            fetch(API_SERVER + '/booking/v5/quotes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apiKey': API_KEY
-                },
-                body: JSON.stringify({
-                    'origin': {
-                        'location': {
-                            'lat': this.origin.location.lat,
-                            'lon': this.origin.location.lon
-                        },
-                        'label': this.origin.name
-                    },
-                    'destination': {
-                        'location': {
-                            'lat': destination.location.lat,
-                            'lon': destination.location.lon
-                        },
-                        'label': destination.name
-                    },
-                    'numberOfTravelers': this.selectedNumber
-                })
-            })
-            .then(response => { 
-                if(response.ok){
-                    return response.json()    
-                } else{
-                    console.log('Server returned ' + response.status + ' : ' + response.statusText);
-                }                
-            })
-            .then(response => {
-                if(response.length > 0){
-                    this.quotes = response
-                    this.timeDeparture = 'Départ à ' + moment(this.quotes[0].journeyEstimate.startTime.earliest).format('HH:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.startTime.latest).format('HH:mm')
-                                            + ' Arrivée à ' + moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('HH:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.finishTime.latest).format('HH:mm')
-                }
-                else {
-                    this.timeDeparture = 'Aucun trajet disponible.'
-                }
-                this.loadingTimeDeparture = false
-            })
-            .catch(err => {
-                console.log(err);
-            })
+            // Call API to know when is the next available shuttle, considering destination/passenger number            
+            let quotes = await this.createQuote()                
+            if(quotes.length > 0) {
+                this.quotes = quotes
+                this.timeDeparture = 'Départ à ' + moment(this.quotes[0].journeyEstimate.startTime.earliest).format('HH:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.startTime.latest).format('HH:mm')
+                                        + ' Arrivée à ' + moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('HH:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.finishTime.latest).format('HH:mm')
+            }
+            else {
+                this.timeDeparture = 'Aucun trajet disponible.'
+            }
+            this.loadingTimeDeparture = false
         },
-        loadAvailableDestinations() {
+        async loadAvailableDestinations() {
             // Call API to get the available destinations
-            fetch(API_SERVER + '/transportation/v1/services/' + API_SERVICE_ID + '/stops', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apiKey': API_KEY
-                }
-            })
-            .then(response => { 
-                if(response.ok){
-                    return response.json()    
-                } else {
-                    console.log('Server returned ' + response.status + ' : ' + response.statusText);
-                }                
-            })
-            .then(response => {
-                if(response){
-                    this.stops = response
-                    this.origin = this.stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))                    
+            let stops = await this.getStops()
+            if(stops) {
+                this.stops = stops
+                    this.origin = this.stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))
                     this.destinationOptions = this.destinationOptions.concat(this.stops.filter(s => s.id !== this.origin.id)
                         .map(s => {
                             return {
@@ -201,63 +151,164 @@ export default {
                             }
                         })
                         .sort((a,b) => a.text.localeCompare(b.text)))
-                }
-            })
-            .catch(err => {
-                console.log(err);
-            });                  
+            } else {
+                this.origin = null
+                this.destinations = null
+            }
         },
         reset() {
             this.selectedNumber = null
             this.selectedDestinationId = null
             this.timeDeparture = null
-            this.quotes = null
-            this.bookingId = null
+            this.quotes = null            
         },
-        book() {       
-            this.bookingId = null
-            if(!this.selectedDestinationId || !this.selectedNumber || !this.quotes || this.quotes.length < 0) return
-
+        async book() {
             const destination = this.stops.find(s => s.id === this.selectedDestinationId)
+            if(!this.selectedDestinationId || !this.selectedNumber || !this.quotes || this.quotes.length < 1 || !destination) return
+            
+            this.loadingBookingStatus = true
+            //Call API to create a booking            
+            let newBooking = await this.createBooking(this.quotes[0].id)
+            
+            if(newBooking) {                
+                let booking
+                let confirmation
 
-            fetch(API_SERVER + '/booking/v5/bookings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apiKey': API_KEY
-                },
-                body: JSON.stringify({
-                    'quoteID': this.quotes[0].id,
-                    'traveler': {
-                        'id': 'display-' + uuidv4()
-                    },
-                    'source': 'API'
-                })
-            })
-            .then(response => { 
-                if(response.ok){
-                    return response.json()    
-                } else{
-                    console.log('Server returned ' + response.status + ' : ' + response.statusText);
-                }                
-            })
-            .then(response => {
-                if(response){
-                    this.bookingId = response.bookingID
-                    const booking = { id: this.bookingId, success: true, destination: destination.name, time: this.timeDeparture }
-                    this.$emit('booking', booking)
-                    this.reset()
+                for(let i = 0; i < 3; i++) {
+                    booking = await this.getBooking(newBooking.bookingID)
+
+                    if(booking.status.toLowerCase() !== 'created') {
+                        break
+                    }
+                    
+                    await this.sleep(3000)
                 }
-            })
-            .catch(err => {
-                console.log(err);
-            })
+
+                if(booking.status.toLowerCase() === 'accepted'){
+                    confirmation = { id: booking.id, success: true, destination: destination.name, time: this.timeDeparture }
+                } else {
+                    confirmation = { success: false, destination: destination.name }
+                }
+                
+                this.$emit('booking', confirmation)
+                this.reset()
+            }            
+            this.loadingBookingStatus = false
+        },        
+        async createQuote() {
+            // Call API to create a quote
+            var destination = this.stops.find(s => s.id === this.selectedDestinationId)
+            
+            try {
+                let response = await fetch(API_SERVER + '/booking/v5/quotes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apiKey': API_KEY
+                    },
+                    body: JSON.stringify({
+                        'origin': {
+                            'location': {
+                                'lat': this.origin.location.lat,
+                                'lon': this.origin.location.lon
+                            },
+                            'label': this.origin.name
+                        },
+                        'destination': {
+                            'location': {
+                                'lat': destination.location.lat,
+                                'lon': destination.location.lon
+                            },
+                            'label': destination.name
+                        },
+                        'numberOfTravelers': this.selectedNumber
+                    })
+                })
+
+                if(response.ok) {
+                    return response.json()
+                } else {
+                    console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        async getStops() {
+            // Call API to get the stops
+            try {
+                let response = await fetch(API_SERVER + '/transportation/v1/services/' + API_SERVICE_ID + '/stops', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apiKey': API_KEY
+                    }
+                })
+
+                if(response.ok) {
+                    return response.json()
+                } else {
+                    console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        async createBooking(quoteId) {
+            //Call API to create a booking
+            try {
+                let response = await fetch(API_SERVER + '/booking/v5/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apiKey': API_KEY
+                    },
+                    body: JSON.stringify({
+                        'quoteID': quoteId,
+                        'traveler': {
+                            'id': 'display-' + uuidv4()
+                        },
+                        'source': 'API'
+                    })
+                })
+
+                if(response.ok) {
+                    return response.json()
+                } else {
+                    console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        async getBooking(bookingId) {
+            // Call API to get a booking
+            try {
+                let response = await fetch(API_SERVER + '/booking/v5/bookings/' + bookingId, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apiKey': API_KEY
+                    }
+                })
+
+                if(response.ok) {
+                    return response.json()
+                } else {
+                    console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
+                }
+            } catch (error) {
+                console.log(error)
+            }            
+        },
+        sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms))
         },
         hide() {
             this.reset()
             this.$emit('hide')
-        },
-    },
+        }
+    }
 }
 </script>
 

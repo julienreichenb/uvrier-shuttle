@@ -22,8 +22,8 @@
         </font-awesome-layers>
         </b-button>
       </l-control>
-       <l-control position="bottomright">
-        <b-button variant="success" @click="showBook = true" class="border-white p-4">
+      <l-control position="bottomright">
+        <b-button v-if="serviceAvailable" variant="success" @click="showBook = true" class="border-white p-4">
           <font-awesome-layers class="fa-5x align-bottom mr-4">
             <font-awesome-icon icon="circle" />
             <font-awesome-icon icon="bookmark" class="text-success" transform="shrink-7"  />
@@ -33,7 +33,7 @@
       </l-control>
       <l-control position="topright">
         <div class="bg-white border border-dark">
-          <b-row no-gutters class="text-success border-bottom border-secondary" style="padding: 10px; width: 400px;">
+          <b-row v-if="serviceAvailable" no-gutters class="text-success border-bottom border-secondary" style="padding: 10px; width: 400px;">
             <b-col sm="3" class="my-auto">
                 <font-awesome-layers class="fa-4x">
                   <font-awesome-icon icon="bus" color="black" />
@@ -49,8 +49,7 @@
               <h2>{{ shuttleFree }}</h2>
             </b-col>
           </b-row>
-          <!--
-          <b-row no-gutters class="text-danger border-bottom border-secondary" style="padding: 10px; width: 400px;">
+          <b-row v-if="!serviceAvailable" no-gutters class="text-danger border-bottom border-secondary" style="padding: 10px; width: 400px;">
             <b-col sm="3" class="my-auto">
               <font-awesome-layers class="fa-4x">
                 <font-awesome-icon icon="bus" color="black" />
@@ -62,11 +61,9 @@
                 </font-awesome-layers>
             </b-col>
             <b-col class="text-left pl-4">
-              <h4 class="pt-2">Véhicules occupés</h4>
-              <h2>{{ shuttleBusy }}</h2>
+              <h4 class="pt-2">Aucun véhicule disponible</h4>              
             </b-col>
-          </b-row>
-          -->
+          </b-row>          
           <b-row no-gutters class="text-info" style="padding: 10px; width: 400px;">
             <b-col sm="3" class="my-auto">
               <font-awesome-icon icon="clock" class="fa-4x" />
@@ -91,11 +88,11 @@
         v-for="(destination, index) in destinations" 
         :key="'destination-' + index" 
         :lat-lng="destination.location"
-        :radius="circle.radius"
+        :radius="circleMarker.radius"
         :color="destinationColor"
         :fill-color="destinationColor"
-        :fill-opacity="circle.fillOpacity"
-        :weight="circle.weight">
+        :fill-opacity="circleMarker.fillOpacity"
+        :weight="circleMarker.weight">
         <l-tooltip :content="destination.name" :options="{ permanent: true, direction: 'auto' }"/>
       </l-circle-marker>
       <l-marker 
@@ -129,14 +126,13 @@ export default {
   BookModal,
   ConfirmModal,
   },
-  mounted() {
-    // Initial load
-    this.loadShuttlesPositions()
-    this.loadOriginAndDestinations()
-    // Reoad Shuttles' position every 1 second
-    setInterval(() => {
-      this.loadShuttlesPositions()
+  async mounted() {    
+    // Load Shuttles' position every 1 second
+    setInterval(async () => {
+      await this.loadShuttlesPositions()
     }, 1000);
+    // Initial load
+    await this.loadOriginAndDestinations()
   },
   data() {
     return {
@@ -161,10 +157,10 @@ export default {
       showConfirm: false,
       booked: null,
       shuttleFree: 0,
-      shuttleBusy: 0,
+      serviceAvailable: false,
       avgWaitingTime: 0,
       liveInfo: 'Traffic régulier.',
-      circle: {
+      circleMarker: {
         radius: 4,
         fillOpacity: 0.5,
         weight: 2
@@ -184,66 +180,35 @@ export default {
     centerUpdate(center) {
       this.currentCenter = center
     },
-    loadShuttlesPositions() {
+    async loadShuttlesPositions() {
       // Call API to get the current shuttles'position      
-      fetch(API_SERVER + '/transportation/v1/vehicles', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'apiKey': API_KEY
-        }
-      })
-      .then(response => { 
-          if(response.ok){
-              return response.json()    
-          } else{
-              this.shuttlePositions = null
-              this.shuttleFree = 0
-              this.shuttleBusy = 0;
-              console.log("Server returned " + response.status + " : " + response.statusText);
-          }                
-      })
-      .then(response => {
-          if(response){
-              this.shuttlePositions = response
-              this.shuttleFree = this.shuttlePositions.length
-              this.shuttleBusy = this.shuttleNumber - this.shuttlePositions.length;
+      let vehicles = await this.getVehicles()
+      if(vehicles) {
+          this.shuttlePositions = vehicles
+          this.shuttleFree = this.shuttlePositions.length
+          if(this.shuttleFree > 0) {
+            this.serviceAvailable = true
+          } else {
+            this.serviceAvailable = false
           }
-      })
-      .catch(err => {
-          console.log(err);
-      });
+      } else {
+        this.shuttlePositions = null
+        this.shuttleFree = 0
+        this.serviceAvailable = false
+      }
       
       this.avgWaitingTime = 2      
     },
-    loadOriginAndDestinations() {
+    async loadOriginAndDestinations() {
       // Call API to get the stops position      
-      fetch(API_SERVER + '/transportation/v1/services/' + API_SERVICE_ID + '/stops', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'apiKey': API_KEY
-        }
-      })
-      .then(response => { 
-          if(response.ok){
-              return response.json()    
-          } else{
-              this.origin
-              this.destinations = null
-              console.log("Server returned " + response.status + " : " + response.statusText);
-          }                
-      })
-      .then(response => {
-          if(response){
-              const stops = response
-              this.origin = stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))              
-              this.destinations = stops.filter(s => s.id !== this.origin.id)
-          }
-      })
-      .catch(err => {
-          console.log(err);
-      });
+      let stops = await this.getStops()
+      if(stops) {
+        this.origin = stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))              
+        this.destinations = stops.filter(s => s.id !== this.origin.id)
+      } else {
+        this.origin = null
+        this.destinations = null  
+      }
       
       this.avgWaitingTime = 2      
     },
@@ -263,6 +228,46 @@ export default {
       this.booked = null
       this.showConfirm = false
       this.showBook = false
+    },
+    async getStops() {
+      // Call API to get the stops      
+      try {
+        let response = await fetch(API_SERVER + '/transportation/v1/services/' + API_SERVICE_ID + '/stops', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'apiKey': API_KEY
+          }          
+        })
+
+        if(response.ok) {
+          return response.json()    
+        } else {
+          console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async getVehicles() {
+      // Call API to get the vehicles
+      try {
+        let response = await fetch(API_SERVER + '/transportation/v2/services/' + API_SERVICE_ID + '/vehicles', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'apiKey': API_KEY
+          }          
+        })
+
+        if(response.ok) {
+          return response.json()    
+        } else {
+          console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
+        }
+      } catch (error) {
+        console.log(error);
+      }
     },
     getIcon(format) {
       return divIcon({
