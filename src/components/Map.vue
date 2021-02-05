@@ -150,6 +150,10 @@ export default {
       mapOptions: {
         zoomSnap: 0.5,
         zoomControl: false,
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false
       },
       showMap: true,      
       shuttlePositions: null,
