@@ -64,7 +64,7 @@
               <h4 class="pt-2">Aucun véhicule disponible</h4>              
             </b-col>
           </b-row>          
-          <b-row no-gutters class="text-info" style="padding: 10px; width: 400px;">
+          <b-row v-if="serviceAvailable" no-gutters class="text-info" style="padding: 10px; width: 400px;">
             <b-col sm="3" class="my-auto">
               <font-awesome-icon icon="clock" class="fa-4x" />
             </b-col>
@@ -93,7 +93,8 @@
         :fill-color="destinationColor"
         :fill-opacity="circleMarker.fillOpacity"
         :weight="circleMarker.weight">
-        <l-tooltip :content="destination.name" :options="{ permanent: true, direction: 'auto' }"/>
+        <l-tooltip v-if="customDestinations.includes(destination.name.toLowerCase())" :content="destination.name" :options="{ permanent: true, direction: 'left' }"/>
+        <l-tooltip v-else :content="destination.name" :options="{ permanent: true, direction: 'right' }"/>
       </l-circle-marker>
       <l-marker 
         v-for="shuttle in shuttlePositions" 
@@ -119,7 +120,7 @@ import { latLng, divIcon } from 'leaflet'
 import InfoModal from './InfoModal'
 import BookModal from './BookModal'
 import ConfirmModal from './ConfirmModal'
-import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME } from '../constants'
+import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME, CUSTOM_DESTINATIONS_FIND_NAME } from '../constants'
 export default {
   components: {
   InfoModal,
@@ -138,6 +139,7 @@ export default {
     return {
       origin: null,
       destinations: null,
+      customDestinations: CUSTOM_DESTINATIONS_FIND_NAME,
       shuttleNumber: 2,
       zoom: 16,
       center: latLng(46.2507967, 7.4220283),
@@ -146,7 +148,7 @@ export default {
       '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       currentZoom: 11.5,
       currentCenter: latLng(46.2513967, 7.4136283),
-      showParagraph: false,
+      showParagraph: false,      
       mapOptions: {
         zoomSnap: 0.5,
         zoomControl: false,
@@ -163,7 +165,7 @@ export default {
       shuttleFree: 0,
       serviceAvailable: false,
       avgWaitingTime: 0,
-      liveInfo: 'Traffic régulier.',
+      liveInfo: 'Horaires de service: 7:00 - 18:00',
       circleMarker: {
         radius: 4,
         fillOpacity: 0.5,
@@ -209,6 +211,11 @@ export default {
       if(stops) {
         this.origin = stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))              
         this.destinations = stops.filter(s => s.id !== this.origin.id)
+        //TO DO Remove when moving to production
+        this.destinations = this.destinations.map( d => { 
+          d.name = d.name.replace('Sion, ', '')
+          return d
+        })
       } else {
         this.origin = null
         this.destinations = null  
@@ -297,5 +304,8 @@ export default {
 }
 .custom-marker{
    background-color: transparent;
+}
+.leaflet-tooltip {
+  padding: 2px !important;
 }
 </style>
