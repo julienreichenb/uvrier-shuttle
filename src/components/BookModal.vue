@@ -83,7 +83,6 @@
 </template>
 
 <script>
-import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME, MAX_NUMBER_PASSENGERS } from '../constants'
 import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
 export default {
@@ -139,7 +138,7 @@ export default {
             let stops = await this.getStops()
             if(stops) {
                 this.stops = stops
-                    this.origin = this.stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))
+                    this.origin = this.stops.find(s => s.name.toLowerCase().includes(process.env.VUE_APP_ORIGIN_FIND_NAME))
                     this.destinationOptions = this.destinationOptions.concat(this.stops.filter(s => s.id !== this.origin.id)
                         .map(s => {
                             return {
@@ -154,7 +153,7 @@ export default {
             }
         },
         loadAvailableNumberOfPassengers() {
-            for(var i=1; i < MAX_NUMBER_PASSENGERS; i++) {
+            for(var i=1; i < parseInt(process.env.VUE_APP_MAX_NUMBER_PASSENGERS); i++) {
                 this.numberOfPassengers = this.numberOfPassengers.concat(
                     { text: (i+1) + ' personnes', value: i+1 }
                 )
@@ -204,11 +203,11 @@ export default {
             var destination = this.stops.find(s => s.id === this.selectedDestinationId)
             
             try {
-                let response = await fetch(API_SERVER + '/booking/v5/quotes', {
+                let response = await fetch(process.env.VUE_APP_API_SERVER + '/booking/v5/quotes', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'apiKey': API_KEY
+                        'apiKey': process.env.VUE_APP_API_KEY
                     },
                     body: JSON.stringify({
                         'origin': {
@@ -241,11 +240,11 @@ export default {
         async getStops() {
             // Call API to get the stops
             try {
-                let response = await fetch(API_SERVER + '/transportation/v1/services/' + API_SERVICE_ID + '/stops', {
+                let response = await fetch(process.env.VUE_APP_API_SERVER + '/transportation/v1/services/' + process.env.VUE_APP_API_SERVICE_ID + '/stops', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'apiKey': API_KEY
+                        'apiKey': process.env.VUE_APP_API_KEY
                     }
                 })
 
@@ -261,11 +260,11 @@ export default {
         async createBooking(quoteId) {
             //Call API to create a booking
             try {
-                let response = await fetch(API_SERVER + '/booking/v5/bookings', {
+                let response = await fetch(process.env.VUE_APP_API_SERVER + '/booking/v5/bookings', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'apiKey': API_KEY
+                        'apiKey': process.env.VUE_APP_API_KEY
                     },
                     body: JSON.stringify({
                         'quoteID': quoteId,
@@ -288,11 +287,11 @@ export default {
         async getBooking(bookingId) {
             // Call API to get a booking
             try {
-                let response = await fetch(API_SERVER + '/booking/v5/bookings/' + bookingId, {
+                let response = await fetch(process.env.VUE_APP_API_SERVER + '/booking/v5/bookings/' + bookingId, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'apiKey': API_KEY
+                        'apiKey': process.env.VUE_APP_API_KEY
                     }
                 })
 

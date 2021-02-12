@@ -122,7 +122,6 @@ import InfoModal from './InfoModal'
 import BookModal from './BookModal'
 import ConfirmModal from './ConfirmModal'
 import moment from 'moment'
-import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME, CUSTOM_DESTINATIONS_FIND_NAME } from '../constants'
 export default {
   components: {
   InfoModal,
@@ -145,7 +144,7 @@ export default {
     return {
       origin: null,
       destinations: null,
-      customDestinations: CUSTOM_DESTINATIONS_FIND_NAME,
+      customDestinations: process.env.VUE_APP_CUSTOM_DESTINATIONS_FIND_NAME.split('|'),
       shuttleNumber: 2,
       zoom: 16,
       center: latLng(46.2507967, 7.4220283),
@@ -213,7 +212,7 @@ export default {
       // Call API to get the stops position
       let stops = await this.getStops()
       if(stops) {
-        this.origin = stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))              
+        this.origin = stops.find(s => s.name.toLowerCase().includes(process.env.VUE_APP_ORIGIN_FIND_NAME))              
         this.destinations = stops.filter(s => s.id !== this.origin.id)
         //TO DO Remove when moving to production
         this.destinations = this.destinations.map( d => { 
@@ -263,11 +262,12 @@ export default {
     async getStops() {
       // Call API to get the stops      
       try {
-        let response = await fetch(API_SERVER + '/transportation/v1/services/' + API_SERVICE_ID + '/stops', {
+        console.log(process.env.VUE_APP_API_SERVER + '/transportation/v1/services/' + process.env.VUE_APP_API_SERVICE_ID + '/stops')
+        let response = await fetch(process.env.VUE_APP_API_SERVER + '/transportation/v1/services/' + process.env.VUE_APP_API_SERVICE_ID + '/stops', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'apiKey': API_KEY
+            'apiKey': process.env.VUE_APP_API_KEY
           }          
         })
 
@@ -283,11 +283,11 @@ export default {
     async getVehicles() {
       // Call API to get the vehicles
       try {
-        let response = await fetch(API_SERVER + '/transportation/v2/services/' + API_SERVICE_ID + '/vehicles', {
+        let response = await fetch(process.env.VUE_APP_API_SERVER + '/transportation/v2/services/' + process.env.VUE_APP_API_SERVICE_ID + '/vehicles', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'apiKey': API_KEY
+            'apiKey': process.env.VUE_APP_API_KEY
           }          
         })
 
@@ -303,11 +303,11 @@ export default {
     async getRides() {
       // Call API to get the max 10 last completed rides
       try {
-        let response = await fetch(API_SERVER + '/booking/v5/rides?status=Completed', {
+        let response = await fetch(process.env.VUE_APP_API_SERVER + '/booking/v5/rides?status=Completed', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'apiKey': API_KEY
+            'apiKey': process.env.VUE_APP_API_KEY
           }          
         })
 
