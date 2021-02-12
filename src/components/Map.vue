@@ -70,7 +70,8 @@
             </b-col>
             <b-col class="text-left pl-4">
               <h4 class="pt-2">Attente moyenne</h4>
-              <h2>{{ avgWaitingTime }} minute(s)</h2>
+              <h2 v-if="avgWaitingTime > 1">{{ avgWaitingTime }} minutes</h2>
+              <h2 v-else>{{ avgWaitingTime }} minute</h2>
             </b-col>
           </b-row>
         </div>
@@ -120,6 +121,7 @@ import { latLng, divIcon } from 'leaflet'
 import InfoModal from './InfoModal'
 import BookModal from './BookModal'
 import ConfirmModal from './ConfirmModal'
+import moment from 'moment'
 import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME, CUSTOM_DESTINATIONS_FIND_NAME } from '../constants'
 export default {
   components: {
@@ -134,6 +136,10 @@ export default {
     }, 1000);
     // Initial load
     await this.loadOriginAndDestinations()
+    // Calculate waiting time every 1 min    
+    setInterval(async () => {
+      await this.computeAvgWaitingTime()
+    }, 60000);
   },
   data() {
     return {
@@ -165,7 +171,7 @@ export default {
       shuttleFree: 0,
       serviceAvailable: false,
       avgWaitingTime: 0,
-      liveInfo: 'Horaires de service: 7:00 - 18:00',
+      liveInfo: 'Horaires de service: 07:00 - 18:00',
       circleMarker: {
         radius: 4,
         fillOpacity: 0.5,
@@ -187,7 +193,7 @@ export default {
       this.currentCenter = center
     },
     async loadShuttlesPositions() {
-      // Call API to get the current shuttles'position      
+      // Call API to get the current shuttles'position
       let vehicles = await this.getVehicles()
       if(vehicles) {
           this.shuttlePositions = vehicles
@@ -202,11 +208,9 @@ export default {
         this.shuttleFree = 0
         this.serviceAvailable = false
       }
-      
-      this.avgWaitingTime = 2      
     },
     async loadOriginAndDestinations() {
-      // Call API to get the stops position      
+      // Call API to get the stops position
       let stops = await this.getStops()
       if(stops) {
         this.origin = stops.find(s => s.name.toLowerCase().includes(ORIGIN_FIND_NAME))              
@@ -220,8 +224,6 @@ export default {
         this.origin = null
         this.destinations = null  
       }
-      
-      this.avgWaitingTime = 2      
     },
     confirmBooking(booked) {
       this.booked = booked
@@ -240,6 +242,24 @@ export default {
       this.showConfirm = false
       this.showBook = false
     },
+    async computeAvgWaitingTime() {
+        // Call API to get the max 10 last rides
+        let response = await this.getRides()
+        if(response.result.length > 0) {
+          let waitingTimes = []
+          for(let i=0; i< response.result.length; i++) {
+            let start = moment(response.result[i].desiredPickupTime)
+            let end = moment(response.result[i].pickupTime)
+            let duration = moment.duration(end.diff(start)).minutes()
+            waitingTimes.push(duration)
+          }
+          let sum = waitingTimes.reduce((a, b) => a + b, 0)          
+          this.avgWaitingTime = (sum / response.result.length).toFixed(0)
+        }
+        else {
+            this.avgWaitingTime = 0
+        }        
+    },
     async getStops() {
       // Call API to get the stops      
       try {
@@ -252,7 +272,7 @@ export default {
         })
 
         if(response.ok) {
-          return response.json()    
+          return response.json()
         } else {
           console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
         }
@@ -272,7 +292,27 @@ export default {
         })
 
         if(response.ok) {
-          return response.json()    
+          return response.json()
+        } else {
+          console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async getRides() {
+      // Call API to get the max 10 last completed rides
+      try {
+        let response = await fetch(API_SERVER + '/booking/v5/rides?status=Completed', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'apiKey': API_KEY
+          }          
+        })
+
+        if(response.ok) {
+          return response.json()
         } else {
           console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
         }
