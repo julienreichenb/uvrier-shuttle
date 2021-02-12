@@ -100,11 +100,11 @@
         v-for="shuttle in shuttlePositions" 
         :key="shuttle.id" 
         :lat-lng="shuttle.location">
-        <l-icon>
+        <l-icon :icon-anchor="[18,6]">
           <font-awesome-layers>
-            <font-awesome-icon icon="circle" class="fa-3x" />
-            <font-awesome-icon icon="circle" class="fa-3x text-white" transform="shrink-1" />
-            <font-awesome-icon icon="bus" class="fa-3x text-success" transform="shrink-6" />
+            <font-awesome-icon icon="circle" class="fa-3x text-white" />
+            <font-awesome-icon icon="circle" class="fa-3x text-success" transform="shrink-1" />
+            <font-awesome-icon icon="bus" class="fa-3x text-white" transform="shrink-7" />
           </font-awesome-layers>
         </l-icon>
       </l-marker>
@@ -215,7 +215,7 @@ export default {
         this.destinations = this.destinations.map( d => { 
           d.name = d.name.replace('Sion, ', '')
           return d
-        })
+        })        
       } else {
         this.origin = null
         this.destinations = null  
