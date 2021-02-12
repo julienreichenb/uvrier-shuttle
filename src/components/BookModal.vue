@@ -46,7 +46,7 @@
                                     <font-awesome-icon icon="user" class="large-text" />
                                 </b-input-group-text>
                             </template>
-                            <b-form-select id="passengers" v-model="selectedNumber" required :options="numberOptions" class="large-text" @change="computeDeparture()" />
+                            <b-form-select id="passengers" v-model="selectedNumber" required :options="numberOfPassengers" class="large-text" @change="computeDeparture()" />
                         </b-input-group>
                     </b-form-group>
                 </b-col>
@@ -83,7 +83,7 @@
 </template>
 
 <script>
-import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME } from '../constants'
+import { API_KEY, API_SERVICE_ID, API_SERVER, ORIGIN_FIND_NAME, MAX_NUMBER_PASSENGERS } from '../constants'
 import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
 export default {
@@ -104,18 +104,15 @@ export default {
             destinationOptions: [
                 { text: 'Choisissez une destination', value: null },
             ],
-            numberOptions: [
+            numberOfPassengers: [
                 { text: 'Choisissez un nombre de passagers', value: null },
-                { text: '1 personne', value: 1 },
-                { text: '2 personnes', value: 2 },
-                { text: '3 personnes', value: 3 },
-                { text: '4 personnes', value: 4 },
-                { text: '5 personnes', value: 5 },
+                { text: '1 personne', value: 1 }                
             ]
         }
     },
     async created() {
         await this.loadAvailableDestinations()
+        this.loadAvailableNumberOfPassengers()
     },
     methods: {
         async computeDeparture() {
@@ -154,6 +151,13 @@ export default {
             } else {
                 this.origin = null
                 this.destinations = null
+            }
+        },
+        loadAvailableNumberOfPassengers() {
+            for(var i=1; i < MAX_NUMBER_PASSENGERS; i++) {
+                this.numberOfPassengers = this.numberOfPassengers.concat(
+                    { text: (i+1) + ' personnes', value: i+1 }
+                )
             }
         },
         reset() {
