@@ -9,10 +9,10 @@
         <template #modal-title>
             <h2 class="font-weight-normal">
                 <font-awesome-layers class="fa-lg mr-3 align-bottom">
-                    <font-awesome-icon icon="circle" class="text-primary" />
+                    <font-awesome-icon icon="circle" class="black" />                    
                     <font-awesome-icon icon="circle" transform="shrink-2" color="white" />
-                    <font-awesome-icon v-if="booking.success" icon="check" class="text-primary" transform="shrink-6"  />
-                    <font-awesome-icon v-else icon="times" class="text-primary" transform="shrink-6"  />
+                    <font-awesome-icon v-if="booking.success" icon="check" class="text-success" transform="shrink-6"  />
+                    <font-awesome-icon v-else icon="times" class="text-danger" transform="shrink-6"  />
                 </font-awesome-layers>
                 <span>Trajet pour <strong>{{ booking.destination}}</strong> <span v-if="booking.success">réservé</span><span v-else>rejeté</span> !</span>
             </h2>                    
