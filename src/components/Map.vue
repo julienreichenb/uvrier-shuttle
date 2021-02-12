@@ -196,13 +196,13 @@ export default {
       // Call API to get the current shuttles'position
       let vehicles = await this.getVehicles()
       if(vehicles) {
-          this.shuttlePositions = vehicles
-          this.shuttleFree = this.shuttlePositions.length
-          if(this.shuttleFree > 0) {
-            this.serviceAvailable = true
-          } else {
-            this.serviceAvailable = false
-          }
+        this.shuttlePositions = vehicles
+        this.shuttleFree = this.shuttlePositions.length
+        if(this.shuttleFree > 0) {
+          this.serviceAvailable = true
+        } else {
+          this.serviceAvailable = false
+        }
       } else {
         this.shuttlePositions = null
         this.shuttleFree = 0
@@ -219,7 +219,7 @@ export default {
         this.destinations = this.destinations.map( d => { 
           d.name = d.name.replace('Sion, ', '')
           return d
-        })        
+        })
       } else {
         this.origin = null
         this.destinations = null  
