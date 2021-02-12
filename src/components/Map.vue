@@ -262,7 +262,6 @@ export default {
     async getStops() {
       // Call API to get the stops      
       try {
-        console.log(process.env.VUE_APP_API_SERVER + '/transportation/v1/services/' + process.env.VUE_APP_API_SERVICE_ID + '/stops')
         let response = await fetch(process.env.VUE_APP_API_SERVER + '/transportation/v1/services/' + process.env.VUE_APP_API_SERVICE_ID + '/stops', {
           method: 'GET',
           headers: {
