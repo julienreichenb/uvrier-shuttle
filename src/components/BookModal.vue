@@ -125,8 +125,8 @@ export default {
             let quotes = await this.createQuote()                
             if(quotes.length > 0) {
                 this.quotes = quotes
-                this.timeDeparture = 'Départ à ' + moment(this.quotes[0].journeyEstimate.startTime.earliest).format('HH:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.startTime.latest).format('HH:mm')
-                                        + ' Arrivée à ' + moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('HH:mm') + ' - ' + moment(this.quotes[0].journeyEstimate.finishTime.latest).format('HH:mm')
+                this.timeDeparture = 'Départ prévu entre ' + moment(this.quotes[0].journeyEstimate.startTime.earliest).format('HH:mm') + ' et ' + moment(this.quotes[0].journeyEstimate.startTime.latest).format('HH:mm')
+                                        + ' Arrivée prévue entre ' + moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('HH:mm') + ' et ' + moment(this.quotes[0].journeyEstimate.finishTime.latest).format('HH:mm')
             }
             else {
                 this.timeDeparture = 'Aucun trajet disponible.'
