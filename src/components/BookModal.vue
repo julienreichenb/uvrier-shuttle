@@ -1,5 +1,5 @@
 <template>
-    <b-modal v-model="show" size="xl" centered header-bg-variant="warning" hide-footer @hide="hide">
+    <b-modal id="book-modal" size="xl" centered header-bg-variant="warning" hide-footer @hide="hide">
         <template #modal-title>
             <h1 class="display-4 font-weight-bold">
                 <font-awesome-layers class="fa-lg mr-3 align-bottom">
@@ -196,7 +196,7 @@ export default {
                 }
                 
                 this.$emit('booking', confirmation)
-                this.reset()
+                this.reset()                
             }            
             this.loadingBookingStatus = false
         },        
@@ -311,7 +311,6 @@ export default {
         },
         hide() {
             this.reset()
-            this.$emit('hide')
         }
     }
 }
