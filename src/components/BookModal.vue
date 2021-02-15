@@ -108,13 +108,15 @@ export default {
             ],
             numberOfPassengers: [
                 { text: 'Choisissez un nombre de passagers', value: null },
-                { text: '1 personne', value: 1 }                
+                { text: '1 personne', value: 1 },
+                { text: '2 personnes', value: 2 },
+                { text: '3 personnes', value: 3 },
+                { text: '4 personnes', value: 4 },
             ]
         }
     },
     async created() {
-        await this.loadAvailableDestinations()
-        this.loadAvailableNumberOfPassengers()
+        await this.loadAvailableDestinations()        
     },
     methods: {
         async computeDeparture() {
@@ -151,13 +153,6 @@ export default {
             } else {
                 this.origin = null
                 this.destinations = null
-            }
-        },
-        loadAvailableNumberOfPassengers() {
-            for(var i=1; i < parseInt(process.env.VUE_APP_MAX_NUMBER_PASSENGERS); i++) {
-                this.numberOfPassengers = this.numberOfPassengers.concat(
-                    { text: (i+1) + ' personnes', value: i+1 }
-                )
             }
         },
         reset() {
