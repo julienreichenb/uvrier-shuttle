@@ -59,14 +59,16 @@
                                 <b-input-group-text class="bg-warning">
                                     <font-awesome-icon icon="clock" class="large-text" />
                                 </b-input-group-text>
-                            </template>
-                            <span v-if="!loadingTimeDeparture" class="large-text pt-1 ml-3 font-weight-bold">{{ timeDeparture }}</span>                            
-                            <span v-else class="large-text pt-1 ml-3">{{ computingTimeDeparture }}</span>
+                            </template>                            
+                            <span v-if="!loadingDepartureTimes && departureTimes" class="large-text pt-1 ml-3 font-weight-bold">Départ prévu entre {{ departureTimes[0] }} et {{ departureTimes[1] }}</span>
+                            <span v-if="!loadingDepartureTimes && arrivalTimes" class="large-text pt-1">(arrivée à destination prévue entre {{ arrivalTimes[0] }} et {{ arrivalTimes[1] }}).</span>
+                            <span v-if="!loadingDepartureTimes && !departureTimes && !arrivalTimes" class="large-text pt-1">Aucun trajet disponible.</span>                        
+                            <span v-if="loadingDepartureTimes" class="large-text pt-1 ml-3">{{ computingDepartureTimes }}</span>
                         </b-input-group>
                     </b-form-group>
                 </b-col>
                 <b-col sm="8">
-                    <b-button class="larger-text p-4" block variant="success" size="lg" :disabled="!timeDeparture || !quotes || loadingBookingStatus" @click="book()">
+                    <b-button class="larger-text p-4" block variant="success" size="lg" :disabled="!departureTimes || !arrivalTimes || !quotes || loadingBookingStatus" @click="book()">
                         <font-awesome-icon icon="check" color="white" class="mr-3" />
                         <span>Confirmer la réservation</span>
                     </b-button>
@@ -96,10 +98,11 @@ export default {
             origin: null,            
             selectedDestinationId: null,
             selectedNumber: null,
-            timeDeparture: null,            
-            loadingTimeDeparture: false,
+            departureTimes: null,
+            arrivalTimes: null,
+            loadingDepartureTimes: false,
             loadingBookingStatus: false,
-            computingTimeDeparture: 'Calcul de l\'horaire...',
+            computingDepartureTimes: 'Calcul de l\'horaire...',
             destinationOptions: [
                 { text: 'Choisissez une destination', value: null },
             ],
@@ -115,23 +118,21 @@ export default {
     },
     methods: {
         async computeDeparture() {
-            this.timeDeparture = null
+            this.departureTimes = null
+            this.arrivalTimes = null
             this.quotes = null
 
             if (!this.selectedDestinationId || !this.selectedNumber) return
             
-            this.loadingTimeDeparture = true
+            this.loadingDepartureTimes = true
             // Call API to know when is the next available shuttle, considering destination/passenger number            
             let quotes = await this.createQuote()                
             if(quotes.length > 0) {
                 this.quotes = quotes
-                this.timeDeparture = 'Départ prévu entre ' + moment(this.quotes[0].journeyEstimate.startTime.earliest).format('HH:mm') + ' et ' + moment(this.quotes[0].journeyEstimate.startTime.latest).format('HH:mm')
-                                        + ' Arrivée prévue entre ' + moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('HH:mm') + ' et ' + moment(this.quotes[0].journeyEstimate.finishTime.latest).format('HH:mm')
+                this.departureTimes = [moment(this.quotes[0].journeyEstimate.startTime.earliest).format('HH:mm'), moment(this.quotes[0].journeyEstimate.startTime.latest).format('HH:mm')]
+                this.arrivalTimes = [moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('HH:mm'), moment(this.quotes[0].journeyEstimate.finishTime.latest).format('HH:mm')]
             }
-            else {
-                this.timeDeparture = 'Aucun trajet disponible.'
-            }
-            this.loadingTimeDeparture = false
+            this.loadingDepartureTimes = false
         },
         async loadAvailableDestinations() {
             // Call API to get the available destinations
@@ -162,7 +163,8 @@ export default {
         reset() {
             this.selectedNumber = null
             this.selectedDestinationId = null
-            this.timeDeparture = null
+            this.departureTimes = null
+            this.arrivalTimes = null
             this.quotes = null            
         },
         async book() {
@@ -188,7 +190,7 @@ export default {
                 }
 
                 if(booking.status.toLowerCase() === 'accepted'){
-                    confirmation = { id: booking.id, success: true, destination: destination.name, time: this.timeDeparture }
+                    confirmation = { id: booking.id, success: true, destination: destination.name, departureTimes: this.departureTimes }
                 } else {
                     confirmation = { success: false, destination: destination.name }
                 }

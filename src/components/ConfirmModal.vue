@@ -17,7 +17,7 @@
                 <span>Trajet pour <strong>{{ booking.destination}}</strong> <span v-if="booking.success">réservé</span><span v-else>rejeté</span> !</span>
             </h2>                    
         </template>
-        <h2 v-if="booking.success" class="p-3"><span>Horaire estimé: {{ booking.time }}.</span></h2>
+        <h2 v-if="booking.success" class="p-3"><span>Départ prévu entre {{ booking.departureTimes[0] }} et {{ booking.departureTimes[1] }}.</span></h2>
         <h2 v-else class="p-3"><span>Aucun véhicule n'est disponible pour accepter cette réservation.</span></h2>
         <h5 v-if="booking.success" class="p-3">Réservation: {{ booking.id }}</h5>
     </b-modal>
