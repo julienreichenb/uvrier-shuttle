@@ -192,34 +192,20 @@ export default {
     },
     async loadShuttlesPositions() {
       // Call API to get the current shuttles'position
-      // let vehicles = await this.getVehicles()
-      // if(vehicles) {
-      //   this.shuttlePositions = vehicles
-      //   this.shuttleFree = this.shuttlePositions.length
-      //   if(this.shuttleFree > 0) {
-      //     this.serviceAvailable = true
-      //   } else {
-      //     this.serviceAvailable = false
-      //   }
-      // } else {
-      //   this.shuttlePositions = null
-      //   this.shuttleFree = 0
-      //   this.serviceAvailable = false
-      // }
-      this.shuttlePositions = [{
-        id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        name: "string",
-        location: {
-          lat: this.destinations[11].location.lat,
-          lon: this.destinations[11].location.lon
-        },          
-      }]      
-      this.shuttleFree = this.shuttlePositions.length
-      if(this.shuttleFree > 0) {
-        this.serviceAvailable = true
+      let vehicles = await this.getVehicles()
+      if(vehicles) {
+        this.shuttlePositions = vehicles
+        this.shuttleFree = this.shuttlePositions.length
+        if(this.shuttleFree > 0) {
+          this.serviceAvailable = true
+        } else {
+          this.serviceAvailable = false
+        }
       } else {
+        this.shuttlePositions = null
+        this.shuttleFree = 0
         this.serviceAvailable = false
-      }
+      }      
     },
     async loadOriginAndDestinations() {
       // Call API to get the stops position
