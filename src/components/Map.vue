@@ -238,7 +238,7 @@ export default {
         if(response.result.length > 0) {
           let waitingTimes = []
           for(let i=0; i< response.result.length; i++) {
-            let start = moment(response.result[i].desiredPickupTime)
+            let start = moment(response.result[i].createdAt)
             let end = moment(response.result[i].pickupTime)
             let duration = moment.duration(end.diff(start)).minutes()
             waitingTimes.push(duration)
