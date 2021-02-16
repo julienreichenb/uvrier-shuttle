@@ -112,7 +112,7 @@
     </l-map>
     <InfoModal />
     <BookModal @booking="confirmBooking"/>
-    <ConfirmModal :confirmation="confirmation" :show="showConfirm"/>
+    <ConfirmModal :confirmation="confirmation" :show="showConfirm" @close="close"/>
   </div>
 </template>
 
@@ -226,16 +226,11 @@ export default {
     async confirmBooking(confirmation) {
       this.confirmation = confirmation
       this.showConfirm = true
-      this.$bvModal.hide('book-modal')      
-      // Close confirmation after 5 seconds
-      setTimeout(() => {
-        this.reset()
-      }, 5000)
+      this.$bvModal.hide('book-modal')
     },
     reset() {
       this.confirmation = null
       this.showConfirm = false
-      this.$bvModal.hide('book-modal')
     },
     async computeAvgWaitingTime() {
         // Call API to get the max 10 last rides
@@ -328,6 +323,9 @@ export default {
       </g>
     </svg>`
       });
+    },
+    close() {
+      this.reset()
     }
   }
 }

@@ -172,20 +172,25 @@ export default {
             
             if(newBooking) {                
                 let booking
+                let ride
                 let confirmation
+                let status
 
-                for(let i = 0; i < 3; i++) {
+                do {
                     booking = await this.getBooking(newBooking.bookingID)
-
-                    if(booking.status.toLowerCase() !== 'created') {
-                        break
-                    }
+                    status = booking.status.toLowerCase()
                     
-                    await this.sleep(3000)
-                }
+                    if(status === 'accepted') {
+                        if(booking.journeyActivities) {
+                            ride = booking.journeyActivities.find(j => j.type.toLowerCase() === 'ride')
+                        }                        
+                    }
 
-                if(booking.status.toLowerCase() === 'accepted'){
-                    confirmation = { id: booking.id, success: true, destination: destination.name, departureTimes: this.departureTimes }
+                    await this.sleep(2000)
+                } while (status === 'created' || (status === 'accepted' && (!ride || ride.status.toLowerCase() !== 'scheduled')))
+                
+                if(booking.status.toLowerCase() === 'accepted') {
+                    confirmation = { id: booking.id, success: true, destination: ride.destination.stopName, departureTimes: [moment(ride.plannedPickupTime.earliest).format('HH:mm'), moment(ride.plannedPickupTime.latest).format('HH:mm')], vehicle: ride.vehicleDetails.name }
                 } else {
                     confirmation = { success: false, destination: destination.name }
                 }
