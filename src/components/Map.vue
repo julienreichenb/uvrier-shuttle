@@ -144,7 +144,7 @@ export default {
     return {
       origin: null,
       destinations: null,
-      customDestinations: process.env.VUE_APP_CUSTOM_DESTINATIONS_FIND_NAME.split('|'),
+      customDestinations: ['uvrier le puits 1', 'uvrier charmilles 2', 'uvrier jardin public', 'uvrier la plaine', 'uvrier les lucioles'],
       shuttleNumber: 2,
       zoom: 16,
       center: latLng(46.2507967, 7.4220283),
@@ -211,13 +211,8 @@ export default {
       // Call API to get the stops position
       let stops = await this.getStops()
       if(stops) {
-        this.origin = stops.find(s => s.name.toLowerCase().includes(process.env.VUE_APP_ORIGIN_FIND_NAME))              
+        this.origin = stops.find(s => s.name.toLowerCase().includes(process.env.VUE_APP_ORIGIN_FIND_NAME))
         this.destinations = stops.filter(s => s.id !== this.origin.id)
-        //TO DO Remove when moving to production
-        this.destinations = this.destinations.map( d => { 
-          d.name = d.name.replace('Sion, ', '')
-          return d
-        })
       } else {
         this.origin = null
         this.destinations = null  
