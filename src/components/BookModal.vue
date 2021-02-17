@@ -187,7 +187,7 @@ export default {
                     }
 
                     await this.sleep(2000)
-                } while (status === 'created' || (status === 'accepted' && (!ride || ride.status.toLowerCase() !== 'scheduled')))
+                } while (status === 'created' || (status === 'accepted' && (!ride || ride.status.toLowerCase() === 'matching')))
                 
                 if(booking.status.toLowerCase() === 'accepted') {
                     confirmation = { id: booking.id, success: true, destination: ride.destination.stopName, departureTimes: [moment(ride.plannedPickupTime.earliest).format('HH:mm'), moment(ride.plannedPickupTime.latest).format('HH:mm')], vehicle: ride.vehicleDetails.name }
