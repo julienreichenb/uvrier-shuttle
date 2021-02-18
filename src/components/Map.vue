@@ -112,7 +112,7 @@
     </l-map>
     <InfoModal />
     <BookModal v-if="origin && destinations" @booking="confirmBooking" :destinations="destinations" :start="origin"/>
-    <ConfirmModal :confirmation="confirmation" :show="showConfirm" @close="close"/>
+    <ConfirmModal v-if="confirmation" :confirmation="confirmation" :show="showConfirm" @close="close"/>
   </div>
 </template>
 

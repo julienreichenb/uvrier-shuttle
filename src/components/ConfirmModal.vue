@@ -1,5 +1,5 @@
 <template>
-  <b-modal v-if="confirmation" 
+  <b-modal 
     v-model="show" 
     size="xl" 
     centered 
