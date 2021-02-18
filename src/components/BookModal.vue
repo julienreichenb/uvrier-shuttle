@@ -20,7 +20,7 @@
                                     <font-awesome-icon icon="map-marker-alt" class="large-text" />
                                 </b-input-group-text>
                             </template>
-                            <span v-if="origin" class="large-text pt-1 ml-3 font-weight-bold">{{ origin.name }}</span>
+                            <span class="large-text pt-1 ml-3 font-weight-bold">{{ origin.name }}</span>
                         </b-input-group>
                     </b-form-group>
                 </b-col>
@@ -90,12 +90,14 @@ import { v4 as uuidv4 } from 'uuid'
 export default {
     props: {
         show: { type: Boolean, default: false },
+        start: { type: Object, default: null },
+        destinations: { type: Array, default: null },
     },
     data() {
         return {
             quotes: null,
-            stops: null,
-            origin: null,            
+            stops: this.destinations,
+            origin: this.start,
             selectedDestinationId: null,
             selectedNumber: null,
             departureTimes: null,
@@ -105,7 +107,12 @@ export default {
             computingDepartureTimes: 'Calcul de l\'horaire...',
             destinationOptions: [
                 { text: 'Choisissez une destination', value: null },
-            ],
+            ].concat(this.destinations.map(s => {
+                return {
+                    value: s.id,
+                    text: s.name
+                }
+            })),
             numberOfPassengers: [
                 { text: 'Choisissez un nombre de passagers', value: null },
                 { text: '1 personne', value: 1 },
@@ -114,9 +121,6 @@ export default {
                 { text: '4 personnes', value: 4 },
             ]
         }
-    },
-    async created() {
-        await this.loadAvailableDestinations()        
     },
     methods: {
         async computeDeparture() {
@@ -135,25 +139,6 @@ export default {
                 this.arrivalTimes = [moment(this.quotes[0].journeyEstimate.finishTime.earliest).format('HH:mm'), moment(this.quotes[0].journeyEstimate.finishTime.latest).format('HH:mm')]
             }
             this.loadingDepartureTimes = false
-        },
-        async loadAvailableDestinations() {
-            // Call API to get the available destinations
-            let stops = await this.getStops()
-            if(stops) {
-                this.stops = stops
-                    this.origin = this.stops.find(s => s.name.toLowerCase().includes(process.env.VUE_APP_ORIGIN_FIND_NAME))
-                    this.destinationOptions = this.destinationOptions.concat(this.stops.filter(s => s.id !== this.origin.id)
-                        .map(s => {
-                            return {
-                                value: s.id,
-                                text: s.name
-                            }
-                        })
-                        .sort((a,b) => a.text.localeCompare(b.text)))
-            } else {
-                this.origin = null
-                this.destinations = null
-            }
         },
         reset() {
             this.selectedNumber = null
@@ -228,26 +213,6 @@ export default {
                         },
                         'numberOfTravelers': this.selectedNumber
                     })
-                })
-
-                if(response.ok) {
-                    return response.json()
-                } else {
-                    console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
-                }
-            } catch (error) {
-                console.log(error)
-            }
-        },
-        async getStops() {
-            // Call API to get the stops
-            try {
-                let response = await fetch(process.env.VUE_APP_API_SERVER + '/transportation/v1/services/' + process.env.VUE_APP_API_SERVICE_ID + '/stops', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apiKey': process.env.VUE_APP_API_KEY
-                    }
                 })
 
                 if(response.ok) {

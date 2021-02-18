@@ -111,7 +111,7 @@
       </l-marker>
     </l-map>
     <InfoModal />
-    <BookModal @booking="confirmBooking"/>
+    <BookModal v-if="origin && destinations" @booking="confirmBooking" :destinations="destinations" :start="origin"/>
     <ConfirmModal :confirmation="confirmation" :show="showConfirm" @close="close"/>
   </div>
 </template>
@@ -139,7 +139,7 @@ export default {
     setInterval(async () => {
       await this.computeAvgWaitingTime()
     }, 60000);
-  },
+  },  
   data() {
     return {
       origin: null,
@@ -212,7 +212,7 @@ export default {
       let stops = await this.getStops()
       if(stops) {
         this.origin = stops.find(s => s.name.toLowerCase().includes(process.env.VUE_APP_ORIGIN_FIND_NAME))
-        this.destinations = stops.filter(s => s.id !== this.origin.id)
+        this.destinations = stops.filter(s => s.id !== this.origin.id).sort((a,b) => a.name.localeCompare(b.name))
       } else {
         this.origin = null
         this.destinations = null  
