@@ -24,7 +24,8 @@
             </b-button>
         </template>
         <h2 v-if="confirmation.success" class="p-3">Votre numéro de réservation est <span class="font-weight-bold">{{ confirmation.id.slice(-2).toUpperCase() }}</span></h2>
-        <h2 v-if="confirmation.success" class="p-3">La navette <span class="font-weight-bold">{{ confirmation.vehicle }}</span> arrivera entre <span class="font-weight-bold">{{ confirmation.departureTimes[0] }}</span> et <span class="font-weight-bold">{{ confirmation.departureTimes[1] }}.</span></h2>
+        <h2 v-if="confirmation.success" class="p-3">La navette <span class="font-weight-bold">{{ confirmation.vehicle }}</span> arrivera prochainement.</h2>
+        <h2 v-if="confirmation.success" class="p-3">Nous vous souhaitons un agréable trajet.</h2>
         <h2 v-else class="p-3"><span>Aucun véhicule n'est disponible pour accepter cette réservation.</span></h2>
     </b-modal>
 </template>
