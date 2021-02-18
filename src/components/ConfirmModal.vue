@@ -19,8 +19,9 @@
             </h2>                    
         </template>
         <template #modal-footer>
-            <b-button size="lg" variant="secondary" @click="close()">
-                Fermer
+            <b-button class="large-text" size="lg" variant="secondary" @click="close()">
+                <font-awesome-icon icon="times" color="white" class="mr-3" />
+                <span>Fermer</span>
             </b-button>
         </template>
         <h2 v-if="confirmation.success" class="p-3">Votre numéro de réservation est <span class="font-weight-bold">{{ confirmation.id.slice(-2).toUpperCase() }}</span></h2>

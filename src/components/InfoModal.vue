@@ -11,8 +11,9 @@
             </h1>
         </template>
         <template #modal-footer="{ ok }">
-            <b-button size="lg" variant="secondary" @click="ok()">
-                Fermer
+            <b-button class="large-text" size="lg" variant="secondary" @click="ok()">
+                <font-awesome-icon icon="times" color="white" class="mr-3" />
+                <span>Fermer</span>
             </b-button>
         </template>
         <h2>Le projet</h2>
