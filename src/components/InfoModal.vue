@@ -10,6 +10,11 @@
                 <span>Informations sur la navette autonome</span>
             </h1>
         </template>
+        <template #modal-footer="{ ok }">
+            <b-button size="lg" variant="secondary" @click="ok()">
+                Fermer
+            </b-button>
+        </template>
         <h2>Le projet</h2>
         <p class="lead"><strong>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus efficitur fringilla libero, id iaculis nunc feugiat vel. Nunc vitae dignissim sem. Fusce tempor bibendum ipsum nec placerat. Nullam tempor suscipit leo. Aliquam id suscipit risus. Nullam ac ex in odio elementum pharetra. Cras at ex vehicula, viverra orci sit amet, auctor dolor. Cras fringilla quam eleifend elit finibus porta.</strong></p>
         <h2>Comment l'utiliser ?</h2>

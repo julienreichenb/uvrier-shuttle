@@ -3,8 +3,7 @@
     v-model="show" 
     size="xl" 
     centered 
-    :header-bg-variant="confirmation.success ? 'success' : 'danger'" 
-    hide-footer
+    :header-bg-variant="confirmation.success ? 'success' : 'danger'"
     hide-header-close
     no-close-on-esc 
     no-close-on-backdrop>
@@ -19,21 +18,14 @@
                 <span>Trajet pour <strong>{{ confirmation.destination }}</strong> <span v-if="confirmation.success">réservé</span><span v-else>rejeté</span> !</span>
             </h2>                    
         </template>
+        <template #modal-footer>
+            <b-button size="lg" variant="secondary" @click="close()">
+                Fermer
+            </b-button>
+        </template>
         <h2 v-if="confirmation.success" class="p-3">Votre numéro de réservation est <span class="font-weight-bold">{{ confirmation.id.slice(-2).toUpperCase() }}</span></h2>
         <h2 v-if="confirmation.success" class="p-3">La navette <span class="font-weight-bold">{{ confirmation.vehicle }}</span> arrivera entre <span class="font-weight-bold">{{ confirmation.departureTimes[0] }}</span> et <span class="font-weight-bold">{{ confirmation.departureTimes[1] }}.</span></h2>
         <h2 v-else class="p-3"><span>Aucun véhicule n'est disponible pour accepter cette réservation.</span></h2>
-        <b-form>            
-            <b-row class="my-1">
-                <b-col sm="9">
-                </b-col>
-                <b-col sm="3">
-                    <b-button class="larger-text p-2" block variant="secondary" size="lg" @click="close()">
-                        <font-awesome-icon icon="times" color="white" class="mr-3" />
-                        <span>Fermer</span>
-                    </b-button>
-                </b-col>
-            </b-row>
-        </b-form>
     </b-modal>
 </template>
 
