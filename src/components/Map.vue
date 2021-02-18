@@ -106,7 +106,8 @@
             <font-awesome-icon icon="circle" class="fa-3x text-white" />
             <font-awesome-icon icon="circle" class="fa-3x text-success" transform="shrink-1" />
             <font-awesome-icon icon="bus" class="fa-3x text-white" transform="shrink-7" />
-          </font-awesome-layers>
+            <font-awesome-layers-text counter :value="shuttle.name" class="fa-4x badge-shuttle" position="top-left" />
+          </font-awesome-layers>          
         </l-icon>
       </l-marker>
     </l-map>
@@ -327,8 +328,10 @@ export default {
 </script>
 
 <style>
-.icon-shuttle {
-  background-color: red ;
+.badge-shuttle {
+  z-index: 200;
+  margin-top: -20px;
+  margin-left: 20px;
 }
 .custom-marker{
    background-color: transparent;
