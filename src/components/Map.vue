@@ -78,11 +78,16 @@
             </b-col>
           </b-row>
         </div>
-        <b-card class="mt-3 border border-dark" header-bg-variant="primary" header-text-variant="white">
+        <b-card v-if="announcements && announcements.length" class="mt-3 border border-dark" header-bg-variant="primary" header-text-variant="white" style="max-width:400px">
           <template v-slot:header>
             <h3 class="mt-1">Annonces</h3>
           </template>
-          <h4 class="text-left">{{ liveInfo }}</h4>
+          <div v-for="(announcement, i) in announcements" :key="'announcement-' + i">
+            <div v-for="contentlanguage in announcement.contentByLanguage" :key="'contentlanguage-' + i + '-' + contentlanguage.language.languageCode">
+              <h4>{{ contentlanguage.content.title }}</h4>
+              <p class="lead"><strong>{{ contentlanguage.content.text }}</strong></p>
+            </div>
+          </div>          
         </b-card>
       </l-control>
       <l-marker v-if="origin" :lat-lng="origin.location" :icon="getIcon(originColor)">
@@ -139,15 +144,19 @@ export default {
     }, 1000);
     // Initial load
     await this.loadOriginAndDestinations()
-    // Calculate waiting time every 1 min    
+    await this.computeAvgWaitingTime()
+    await this.loadAnnouncements()
+    // Calculate waiting time and load traveler announcements every 1 min    
     setInterval(async () => {
       await this.computeAvgWaitingTime()
+      await this.loadAnnouncements()
     }, 60000);
   },  
   data() {
     return {
       origin: null,
       destinations: null,
+      announcements: null,
       customDestinations: ['uvrier le puits 1', 'uvrier charmilles 2', 'uvrier jardin public', 'uvrier la plaine', 'uvrier les lucioles'],
       shuttleNumber: 2,
       zoom: 16,
@@ -173,7 +182,6 @@ export default {
       shuttleFree: 0,
       serviceAvailable: false,
       avgWaitingTime: 0,
-      liveInfo: 'Horaires de service: 07:00 - 18:00',
       circleMarker: {
         radius: 4,
         fillOpacity: 0.5,
@@ -249,6 +257,15 @@ export default {
             this.avgWaitingTime = 0
         }        
     },
+    async loadAnnouncements() {
+      // Call API to get the active traveler announcements
+      let announcements = await this.getAnnouncements()
+      if(announcements) {
+        this.announcements = announcements
+      } else {
+        this.announcements = null
+      }
+    },
     async getStops() {
       // Call API to get the stops      
       try {
@@ -293,6 +310,26 @@ export default {
       // Call API to get the max 10 last completed rides
       try {
         let response = await fetch(process.env.VUE_APP_API_SERVER + '/booking/v5/rides?status=Completed', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'apiKey': process.env.VUE_APP_API_KEY
+          }          
+        })
+
+        if(response.ok) {
+          return response.json()
+        } else {
+          console.log('Server returned ' + response.status + ' : ' + response.statusText);                    
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async getAnnouncements() {
+      // Call API to get the active traveler announcements
+      try {
+        let response = await fetch(process.env.VUE_APP_API_SERVER + '/transportation/v1/announcements', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
