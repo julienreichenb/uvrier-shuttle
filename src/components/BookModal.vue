@@ -24,6 +24,8 @@
                         </b-input-group>
                     </b-form-group>
                 </b-col>
+            </b-row>
+            <b-row class="my-5">
                 <b-col>
                     <b-form-group label="Destination" label-for="destination">
                         <b-input-group class="mt-3" size="lg">
@@ -60,9 +62,11 @@
                                     <font-awesome-icon icon="clock" class="large-text" />
                                 </b-input-group-text>
                             </template>                            
-                            <span v-if="!loadingDepartureTimes && departureTimes" class="large-text pt-1 ml-3 font-weight-bold">Départ prévu entre {{ departureTimes[0] }} et {{ departureTimes[1] }}</span>
-                            <span v-if="!loadingDepartureTimes && arrivalTimes" class="large-text pt-1">(arrivée à destination prévue entre {{ arrivalTimes[0] }} et {{ arrivalTimes[1] }}).</span>
-                            <span v-if="!loadingDepartureTimes && !departureTimes && !arrivalTimes" class="large-text pt-1">Aucun trajet disponible.</span>                        
+                            <div v-if="!loadingDepartureTimes">
+                                <div v-if="departureTimes" class="large-text pt-1 ml-3 font-weight-bold">Départ prévu entre {{ departureTimes[0] }} et {{ departureTimes[1] }}</div>
+                                <div v-if="arrivalTimes" class="large-text pt-1 ml-3">Arrivée à destination prévue entre {{ arrivalTimes[0] }} et {{ arrivalTimes[1] }}</div>
+                                <span v-if="!departureTimes && !arrivalTimes" class="large-text pt-1">Aucun trajet disponible.</span>                        
+                            </div>
                             <span v-if="loadingDepartureTimes" class="large-text pt-1 ml-3">{{ computingDepartureTimes }}</span>
                         </b-input-group>
                     </b-form-group>

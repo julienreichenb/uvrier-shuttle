@@ -1,7 +1,7 @@
 <template>
   <div style="width: 100%">
     <l-map
-      style="height: 82vh"
+      style="height: calc(100vh - 205px)"
       v-if="showMap"
       :zoom="zoom"
       :center="center"
@@ -78,14 +78,16 @@
             </b-col>
           </b-row>
         </div>
-        <b-card v-if="announcements && announcements.length" class="mt-3 border border-dark" header-bg-variant="primary" header-text-variant="white" style="max-width:400px">
+        <b-card v-if="announcements && announcements.length" class="mt-3 border border-dark" header-bg-variant="primary" header-text-variant="white" style="width:400px;">
           <template v-slot:header>
             <h3 class="mt-1">Annonces</h3>
           </template>
-          <div v-for="(announcement, i) in announcements" :key="'announcement-' + i">
-            <div v-for="contentlanguage in announcement.contentByLanguage" :key="'contentlanguage-' + i + '-' + contentlanguage.language.languageCode">
-              <h4>{{ contentlanguage.content.title }}</h4>
-              <p class="lead"><strong>{{ contentlanguage.content.text }}</strong></p>
+          <div class="announcements-list">
+            <div v-for="(announcement, i) in announcements" :key="'announcement-' + i">
+              <div v-for="contentlanguage in announcement.contentByLanguage" :key="'contentlanguage-' + i + '-' + contentlanguage.language.languageCode">
+                <h4>{{ contentlanguage.content.title }}</h4>
+                <p class="lead"><strong>{{ contentlanguage.content.text }}</strong></p>
+              </div>
             </div>
           </div>          
         </b-card>
@@ -160,12 +162,12 @@ export default {
       customDestinations: ['uvrier le puits 1', 'uvrier charmilles 2', 'uvrier jardin public', 'uvrier la plaine', 'uvrier les lucioles'],
       shuttleNumber: 2,
       zoom: 16,
-      center: latLng(46.2507967, 7.4220283),
+      center: latLng(46.25055924910488, 7.417771589825862),
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
       '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       currentZoom: 11.5,
-      currentCenter: latLng(46.2513967, 7.4136283),
+      currentCenter: latLng(46.25055924910488, 7.417771589825862),
       showParagraph: false,      
       mapOptions: {
         zoomSnap: 0.5,
@@ -378,5 +380,9 @@ export default {
 }
 .leaflet-tooltip {
   padding: 2px !important;
+}
+.announcements-list {
+  max-height: calc(100vh - 743px);
+  overflow: scroll;
 }
 </style>
