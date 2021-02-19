@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import VueRouter from 'vue-router'
 import App from './App.vue'
 import { BootstrapVue } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
@@ -29,6 +30,7 @@ Vue.component('font-awesome-layers', FontAwesomeLayers)
 Vue.component('font-awesome-layers-text', FontAwesomeLayersText)
 
 Vue.use(BootstrapVue)
+Vue.use(VueRouter)
 
 Vue.config.productionTip = false
 
@@ -40,7 +42,15 @@ Icon.Default.mergeOptions({
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
+const routes = [
+  { path: '/', component: App }
+]
+const router = new VueRouter({
+  mode: 'history',
+  routes: routes
+})
 
 new Vue({
+  router,
   render: h => h(App),
 }).$mount('#app')

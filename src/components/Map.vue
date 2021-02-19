@@ -93,7 +93,8 @@
         </b-card>
       </l-control>
       <l-marker v-if="origin" :lat-lng="origin.location" :icon="getIcon(originColor)">
-        <l-tooltip :content="origin.name" :options="{ permanent: true, direction: 'auto' }"/>
+        <l-tooltip v-if="leftTooltipStops.includes(origin.name.toLowerCase())" :content="origin.name" :options="{ permanent: true, direction: 'left' }"/>
+        <l-tooltip v-else :content="origin.name" :options="{ permanent: true, direction: 'right' }"/>
       </l-marker>
       <l-circle-marker 
         v-for="(destination, index) in destinations" 
@@ -104,7 +105,7 @@
         :fill-color="destinationColor"
         :fill-opacity="circleMarker.fillOpacity"
         :weight="circleMarker.weight">
-        <l-tooltip v-if="customDestinations.includes(destination.name.toLowerCase())" :content="destination.name" :options="{ permanent: true, direction: 'left' }"/>
+        <l-tooltip v-if="leftTooltipStops.includes(destination.name.toLowerCase())" :content="destination.name" :options="{ permanent: true, direction: 'left' }"/>
         <l-tooltip v-else :content="destination.name" :options="{ permanent: true, direction: 'right' }"/>
       </l-circle-marker>
       <l-marker 
@@ -159,7 +160,8 @@ export default {
       origin: null,
       destinations: null,
       announcements: null,
-      customDestinations: ['uvrier le puits 1', 'uvrier charmilles 2', 'uvrier jardin public', 'uvrier la plaine', 'uvrier les lucioles'],
+      defaultOriginName: 'st-léonard gare',
+      leftTooltipStops: ['uvrier le puits 1', 'uvrier charmilles 2', 'uvrier jardin public', 'uvrier la plaine', 'uvrier les lucioles', 'st-léonard gare'],
       shuttleNumber: 2,
       zoom: 16,
       center: latLng(46.25055924910488, 7.417771589825862),
@@ -225,7 +227,14 @@ export default {
       // Call API to get the stops position
       let stops = await this.getStops()
       if(stops) {
-        this.origin = stops.find(s => s.name.toLowerCase().includes(process.env.VUE_APP_ORIGIN_FIND_NAME))
+        if(this.$route.query.origin) {
+          this.origin = stops.find(s => s.name.toLowerCase().includes(this.$route.query.origin))
+        }
+
+        if(!this.origin) {
+          this.origin = stops.find(s => s.name.toLowerCase().includes(this.defaultOriginName))
+        }
+        
         this.destinations = stops.filter(s => s.id !== this.origin.id).sort((a,b) => a.name.localeCompare(b.name))
       } else {
         this.origin = null
