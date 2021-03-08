@@ -115,7 +115,7 @@
         <l-icon :icon-anchor="[18,6]">
           <font-awesome-layers>
             <font-awesome-icon icon="circle" class="fa-3x text-white" />
-            <font-awesome-icon icon="circle" class="fa-3x text-success" transform="shrink-1" />
+            <font-awesome-icon icon="circle" class="fa-3x text-warning" transform="shrink-1" />
             <font-awesome-icon icon="bus" class="fa-3x text-white" transform="shrink-7" />
             <font-awesome-layers-text counter :value="shuttle.name" class="fa-4x badge-shuttle" position="top-left" />
           </font-awesome-layers>          
