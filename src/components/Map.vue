@@ -24,14 +24,14 @@
       </l-control>
       <l-control position="bottomright">
         <b-button v-if="serviceAvailable" variant="success" @click="$bvModal.show('book-modal')" class="border-white p-4">
-          <font-awesome-layers class="fa-5x align-bottom mr-4">
+          <font-awesome-layers class="fa-4x align-bottom mr-4">
             <font-awesome-icon icon="circle" />
             <font-awesome-icon icon="tablet-alt" class="text-success" transform="shrink-5" />
             <font-awesome-icon icon="bullseye" class="text-success" transform="shrink-11 up-0.5 left-0.25" />
             <font-awesome-icon icon="hand-point-up" class="text-white" transform="shrink-8 down-2 right-2.2 rotate--30"/>
             <font-awesome-icon icon="hand-point-up" class="text-success" transform="shrink-9 down-2 right-2.2 rotate--30"/>            
           </font-awesome-layers>
-          <span class="display-3">Réserver un trajet</span>
+          <span class="display-4">Réserver un trajet</span>
         </b-button>
       </l-control>
       <l-control position="topright">
@@ -163,16 +163,16 @@ export default {
       defaultOriginName: 'st-léonard gare',
       leftTooltipStops: ['uvrier le puits 1', 'uvrier charmilles 2', 'uvrier jardin public', 'uvrier la plaine', 'uvrier les lucioles', 'st-léonard gare'],
       shuttleNumber: 2,
-      zoom: 16,
-      center: latLng(46.25055924910488, 7.417771589825862),
+      zoom: 15.9,
+      center: latLng(46.249847438098335, 7.419090754521022),
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
       '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      currentZoom: 11.5,
-      currentCenter: latLng(46.25055924910488, 7.417771589825862),
+      currentZoom: 15.9,
+      currentCenter: latLng(46.249847438098335, 7.419090754521022),
       showParagraph: false,      
       mapOptions: {
-        zoomSnap: 0.5,
+        zoomSnap: 0.3,
         zoomControl: false,
         dragging: false,
         touchZoom: false,
@@ -391,7 +391,13 @@ export default {
   padding: 2px !important;
 }
 .announcements-list {
-  max-height: calc(100vh - 743px);
+  max-height: calc(100vh - 700px);
   overflow: scroll;
+}
+div.card-header {
+  padding: 10px;
+}
+div.card-body {
+  padding: 10px;
 }
 </style>

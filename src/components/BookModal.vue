@@ -11,7 +11,7 @@
             </h1>
         </template>
         <b-form>
-            <b-row class="my-5">
+            <b-row class="my-3">
                 <b-col>
                     <b-form-group label="Départ" label-for="start">
                         <b-input-group class="mt-3" size="lg">
@@ -25,7 +25,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <b-row class="my-5">
+            <b-row class="my-3">
                 <b-col>
                     <b-form-group label="Destination" label-for="destination">
                         <b-input-group class="mt-3" size="lg">
@@ -38,8 +38,6 @@
                         </b-input-group>
                     </b-form-group>
                 </b-col>
-            </b-row>
-            <b-row class="my-5">
                 <b-col>
                     <b-form-group label="Nombre de passagers" label-for="passengers">
                         <b-input-group class="mt-3" size="lg">
@@ -53,8 +51,8 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <b-row class="my-5" v-if="selectedDestinationId && selectedNumber">
-                <b-col sm="12" class="mb-5">
+            <b-row class="mt-3" v-if="selectedDestinationId && selectedNumber">
+                <b-col sm="12" class="mb-3">
                     <b-form-group label="Prochain départ" label-for="time-departure">
                         <b-input-group class="mt-3" size="lg">
                             <template #prepend>
