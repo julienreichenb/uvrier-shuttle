@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+  uvriershuttle:
+    image: uvriershuttle
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    networks: 
+      - myapp
+      - proxy
+    environment:
+      - VUE_APP_API_KEY=${VUE_APP_API_KEY}
+      - VUE_APP_API_SERVICE_ID=${VUE_APP_API_SERVICE_ID}
+      - VUE_APP_API_SERVER=${VUE_APP_API_SERVER}
+
+networks:
+  proxy:
+    external: true
+  myapp:
+    external: false
